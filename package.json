@@ -1,0 +1,16 @@
+{
+  "name": "mern-ecommerce",
+  "version": "1.0.0",
+  "description": "A full-stack ecommerce website built using the MERN (MongoDB, Express.js, React.js, Node.js) stack. This application provides users with the ability to browse and purchase products, manage their shopping cart, and track their orders. It includes features such as user authentication, product search, reviews, and a responsive user interface.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server --ignore client",
+    "develop": "concurrently \"cd server && npm run start\" \"cd client && npm start\"",
+    "install": "cd server && npm i && cd ../client && npm i",
+    "seed": "cd server && npm run seed",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
