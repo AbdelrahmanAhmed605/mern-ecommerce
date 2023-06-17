@@ -6,6 +6,7 @@ const cartSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true, // Added index to improve query performance when searching for the cart of a particular user
     },
     products: [
       {
