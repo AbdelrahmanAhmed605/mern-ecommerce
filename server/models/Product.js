@@ -13,6 +13,10 @@ const productSchema = new Schema(
       required: [true, "Product description is required"],
       maxlength: [2000, "Description cannot exceed 2000 characters"],
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
     price: {
       type: Number,
       required: [true, "Product price is required"],

@@ -63,32 +63,6 @@ const userSchema = new Schema(
         message: "Please enter a valid phone number",
       },
     },
-    // stores items in the users shopping cart
-    cart: {
-      type: Schema.Types.ObjectId,
-      ref: "Cart",
-    },
-    // stores the users purchased orders
-    orders: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Order",
-      },
-    ],
-    // stores the users product reviews
-    reviews: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Review",
-      },
-    ],
-    // stores the users uploaded products that they have submitted to the marketplace
-    products: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
   },
   { timestamps: true }
 );
