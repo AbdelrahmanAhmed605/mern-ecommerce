@@ -64,12 +64,10 @@ const userSchema = new Schema(
       },
     },
     // stores items in the users shopping cart
-    cart: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Cart",
-      },
-    ],
+    cart: {
+      type: Schema.Types.ObjectId,
+      ref: "Cart",
+    },
     // stores the users purchased orders
     orders: [
       {
