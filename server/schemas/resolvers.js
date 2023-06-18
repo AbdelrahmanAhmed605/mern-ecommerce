@@ -40,12 +40,12 @@ const resolvers = {
     // Resolver for fetching all products
     products: async (parent, { page = 1, pageSize = 10 }) => {
       try {
-        const skip = (page - 1) * pageSize;
+        const skip = (page - 1) * pageSize; // Calculate the number of documents to skip based on the current page and page size
         const products = await Product.find()
           .populate("categories")
           .populate("user")
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize); // Retrieve only the specified number of products per page
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");
@@ -246,36 +246,36 @@ const resolvers = {
         throw new Error("Failed to fetch reviews");
       }
     },
-  },
 
-  // Developer-only resolvers
+    // Developer-only resolvers
 
-  // Resolver for fetching an order by ID (for developers only)
-  developerOrder: async (parent, { orderId }) => {
-    try {
-      const order = await Order.findById(orderId).populate({
-        path: "products.product",
-        model: "Product",
-      });
+    // Resolver for fetching an order by ID (for developers only)
+    developerOrder: async (parent, { orderId }) => {
+      try {
+        const order = await Order.findById(orderId).populate({
+          path: "products.product",
+          model: "Product",
+        });
 
-      if (!order) {
-        throw new UserInputError("Order not found");
+        if (!order) {
+          throw new UserInputError("Order not found");
+        }
+
+        return order;
+      } catch (error) {
+        throw new Error("Failed to fetch order");
       }
+    },
 
-      return order;
-    } catch (error) {
-      throw new Error("Failed to fetch order");
-    }
-  },
-
-  // Resolver for fetching all users (for developers only)
-  allUsers: async (parent, args) => {
-    try {
-      const users = await User.find();
-      return users;
-    } catch (error) {
-      throw new Error("Failed to fetch users");
-    }
+    // Resolver for fetching all users (for developers only)
+    allUsers: async (parent, args) => {
+      try {
+        const users = await User.find();
+        return users;
+      } catch (error) {
+        throw new Error("Failed to fetch users");
+      }
+    },
   },
 };
 
