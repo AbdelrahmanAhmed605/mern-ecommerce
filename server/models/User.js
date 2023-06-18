@@ -4,6 +4,18 @@ const validator = require("validator");
 
 const userSchema = new Schema(
   {
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      unique: true,
+      minlength: 3,
+      maxlength: 20,
+      validate: {
+        validator: (value) => /^[a-zA-Z0-9_.-]+$/.test(value),
+        message:
+          "Username can only contain letters, numbers, underscores, dashes, and periods",
+      },
+    },
     firstName: {
       type: String,
       required: [true, "First name is required"],
