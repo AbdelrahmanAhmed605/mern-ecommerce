@@ -28,11 +28,13 @@ const productSchema = new Schema(
         message: "Invalid image URL",
       },
     },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      required: [true, "Product category is required"],
-    },
+    categories: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Category",
+        required: [true, "Product category is required"],
+      },
+    ],
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
