@@ -14,10 +14,6 @@ const typeDefs = gql`
     email: String!
     address: String!
     phone: String!
-    cart: Cart!
-    orders: [Order!]!
-    reviews: [Review!]!
-    products: [Product!]!
     createdAt: String!
     updatedAt: String!
   }
@@ -25,6 +21,7 @@ const typeDefs = gql`
   type Product {
     _id: ID!
     title: String!
+    averageRating: Float!
     description: String!
     price: Float!
     image: String!
@@ -85,24 +82,37 @@ const typeDefs = gql`
     allUsers: [User!]!
     singleUser(userId: ID!): User
 
-    products: [Product!]!
+    products(page: Int, pageSize: Int): [Product!]!
     product(id: ID!): Product
-    productsByUser(userId: ID!): [Product!]!
-    productsByCategory(categoryIds: [ID!]): [Product!]!
-    productsByPriceRange(minPrice: Float!, maxPrice: Float!): [Product!]!
-    productsByReviewRating(rating: Float!): [Product!]!
+    productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
+    productsByCategory(
+      categoryIds: [ID!]
+      page: Int
+      pageSize: Int
+    ): [Product!]!
+    productsByPriceRange(
+      minPrice: Float!
+      maxPrice: Float!
+      page: Int
+      pageSize: Int
+    ): [Product!]!
+    productsByReviewRating(
+      minRating: Float!
+      maxRating: Float!
+      page: Int
+      pageSize: Int
+    ): [Product!]!
 
     categories: [Category!]!
     category(id: ID!): Category
 
-    cart(id: ID!): Cart
-    cartByUser(userId: ID!): Cart
+    cart: Cart
 
     order(id: ID!): Order
-    ordersByUser(userId: ID!): [Order!]!
+    ordersByUser(page: Int, pageSize: Int): [Order!]!
+    developerOrder(orderId: ID!): Order
 
-    review(id: ID!): Review
-    reviewsByUser(userId: ID!): [Review!]!
+    reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
   }
   type Mutation {
     login(email: String!, password: String!): Auth
@@ -193,3 +203,5 @@ const typeDefs = gql`
     quantity: Int!
   }
 `;
+
+module.exports = typeDefs;
