@@ -617,7 +617,7 @@ const resolvers = {
           // Check if the product has sufficient quantity in stock
           if (product.quantity < orderQuantity) {
             throw new Error(
-              `Insufficient quantity for product ${product.title}`
+              `Insufficient stock for product '${product.title}'. Only ${product.quantity} units left in stock.`
             );
           }
 
