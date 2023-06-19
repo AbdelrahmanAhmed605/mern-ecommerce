@@ -25,6 +25,14 @@ const productSchema = new Schema(
         message: "Price must be a non-negative value",
       },
     },
+    quantity: {
+      type: Number,
+      default: 0,
+      validate: {
+        validator: (value) => value >= 0,
+        message: "Quantity must be a non-negative value",
+      },
+    },
     image: {
       type: String,
       validate: {
@@ -55,8 +63,8 @@ const productSchema = new Schema(
 
 // Pre-save middleware
 productSchema.pre("save", async function (next) {
-  // Only proceed if the image field is modified
-  if (this.isModified("image")) {
+  // Only proceed if the image field is modified and no URL is already provided
+  if (this.isModified("image") && !validator.isURL(this.image)) {
     const result = await cloudinary.uploader.upload(this.image); // Upload the image to Cloudinary
     this.image = result.secure_url; // Update the image field with the Cloudinary URL
   }
