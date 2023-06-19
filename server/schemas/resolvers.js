@@ -424,6 +424,172 @@ const resolvers = {
         throw new Error("Failed to delete user");
       }
     },
+
+    // Create a shopping cart for the user
+    createCart: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Create a new cart with initial values
+        const cart = await Cart.create({
+          user: context.user._id,
+          products: [],
+          totalPrice: 0,
+        });
+
+        // Return the created cart
+        return cart;
+      } catch (error) {
+        throw new Error("Failed to create cart");
+      }
+    },
+
+    // Add a product with a specified quantity to the shopping cart
+    addToCart: async (parent, { cartId, productId, quantity }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Find the product by its ID and check the product exists
+        const product = await Product.findById(productId);
+        if (!product) {
+          throw new Error("Product not found");
+        }
+
+        // Update the cart by adding the product and its quantity as well as updating the total price of the cart
+        const cart = await Cart.findOneAndUpdate(
+          { _id: cartId, user: context.user._id },
+          {
+            $push: { products: { product: productId, quantity } },
+            $inc: { totalPrice: quantity * product.price }, // Increment the total price by the added quantity multiplied by the product's price
+          },
+          { new: true }
+        );
+
+        return cart;
+      } catch (error) {
+        throw new Error("Failed to add item to cart");
+      }
+    },
+
+    // Remove a product from the cart
+    removeFromCart: async (parent, { cartId, productId }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+          throw new Error("Product not found");
+        }
+
+        // Find the cart by its ID and ensure it exists
+        const cart = await Cart.findById(cartId);
+        if (!cart) {
+          throw new Error("Cart not found");
+        }
+
+        // Find the product to be removed from the cart
+        const removedProduct = cart.products.find(
+          (productItem) => productItem.product.toString() === productId
+        );
+        // If the product to be removed is not found in the cart, throw an error
+        if (!removedProduct) {
+          throw new Error("Product not found in cart");
+        }
+
+        // Calculate the reduction in the total price based on the removed product's quantity and price
+        const totalPriceReduction = removedProduct.quantity * product.price;
+        // Update the total price of the cart by subtracting the reduction
+        cart.totalPrice -= totalPriceReduction;
+
+        // Remove the product from the cart's products array
+        cart.products = cart.products.filter(
+          (productItem) => productItem.product.toString() !== productId
+        );
+
+        // Save the updated cart
+        await cart.save();
+        return cart;
+      } catch (error) {
+        throw new Error("Failed to remove item from cart");
+      }
+    },
+
+    // Update the quantity of a product in the cart
+    updateCartProductQuantity: async (
+      parent,
+      { cartId, productId, quantity },
+      context
+    ) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+          throw new Error("Product not found");
+        }
+
+        const cart = await Cart.findById(cartId);
+        if (!cart) {
+          throw new Error("Cart not found");
+        }
+
+        // Find the product in the cart to update its quantity
+        const changedProduct = cart.products.find(
+          (productItem) => productItem.product.toString() === productId
+        );
+        // If the product is not found in the cart, throw an error
+        if (!changedProduct) {
+          throw new Error("Product not found in cart");
+        }
+
+        // Calculate the change in the total price based on the difference between the new quantity and the old quantity, multiplied by the product's price
+        const totalPriceChange =
+          (quantity - changedProduct.quantity) * product.price;
+        // Update the total price of the cart by adding the price change
+        cart.totalPrice += totalPriceChange;
+        // Update the quantity of the changed product in the cart
+        changedProduct.quantity = quantity;
+
+        await cart.save();
+
+        return cart;
+      } catch (error) {
+        throw new Error("Failed to update product quantity in cart");
+      }
+    },
+
+    // Delete the user's cart
+    deleteCart: async (parent, { id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Find and delete the cart matching the provided ID and owned by the authenticated user
+        const cart = await Cart.findOneAndDelete({
+          _id: id,
+          user: context.user._id,
+        });
+        // If the cart is not found or the user is not authorized to delete it, throw an error
+        if (!cart) {
+          throw new Error(
+            "Cart not found or you are not authorized to delete it"
+          );
+        }
+
+        return cart;
+      } catch (error) {
+        throw new Error("Failed to delete cart");
+      }
+    },
   },
 };
 
