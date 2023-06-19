@@ -841,6 +841,78 @@ const resolvers = {
         throw new Error("Failed to update order");
       }
     },
+
+    // Create a new category
+    createCategory: async (parent, { name }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        if (context.user.role === "user") {
+          throw new AuthenticationError(
+            "Only admin or developer users can create categories"
+          );
+        }
+
+        const category = await Category.create(name);
+        return category;
+      } catch (error) {
+        throw new Error("Failed to create category");
+      }
+    },
+
+    // Update an existing category
+    updateCategory: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        if (context.user.role === "user") {
+          throw new AuthenticationError(
+            "Only admin or developer users can update categories"
+          );
+        }
+
+        const category = await Category.findByIdAndUpdate(args.id, args, {
+          new: true,
+        });
+        if (!category) {
+          throw new Error(
+            "Category not found or you are not authorized to update it"
+          );
+        }
+
+        return category;
+      } catch (error) {
+        throw new Error("Failed to update category");
+      }
+    },
+
+    // Delete an existing category
+    deleteCategory: async (parent, { id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        if (context.user.role == "user") {
+          throw new AuthenticationError(
+            "Only admin or developer users can delete categories"
+          );
+        }
+
+        const category = await Category.findByIdAndDelete(id);
+        if (!category) {
+          throw new Error(
+            "Category not found or you are not authorized to delete it"
+          );
+        }
+
+        return category;
+      } catch (error) {
+        throw new Error("Failed to delete category");
+      }
+    },
   },
 };
 
