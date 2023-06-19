@@ -8,6 +8,7 @@ const typeDefs = gql`
 
   type User {
     _id: ID!
+    role: String! 
     username: String!
     firstName: String!
     lastName: String!
@@ -24,6 +25,7 @@ const typeDefs = gql`
     averageRating: Float!
     description: String!
     price: Float!
+    quantity: Int!
     image: String!
     categories: [Category!]!
     user: User
@@ -115,9 +117,10 @@ const typeDefs = gql`
     reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
   }
   type Mutation {
-    login(email: String!, password: String!): Auth
+    login(usernameOrEmail: String!, password: String!): Auth
 
     createUser(
+      role: String!
       username: String!
       firstName: String!
       lastName: String!
@@ -127,7 +130,6 @@ const typeDefs = gql`
     ): Auth
 
     updateUser(
-      id: ID!
       username: String
       firstName: String
       lastName: String
@@ -142,9 +144,9 @@ const typeDefs = gql`
       title: String!
       description: String!
       price: Float!
+      quantity: Int!
       image: String!
       categories: [ID!]!
-      userId: ID
     ): Product
 
     updateProduct(
@@ -152,9 +154,9 @@ const typeDefs = gql`
       title: String
       description: String
       price: Float
+      quantity: Int
       image: String
       categories: [ID!]
-      userId: ID
     ): Product
 
     deleteProduct(id: ID!): Product
@@ -163,14 +165,13 @@ const typeDefs = gql`
     updateCategory(id: ID!, name: String): Category
     deleteCategory(id: ID!): Category
 
-    createCart(userId: ID!): Cart
+    createCart(): Cart
     addToCart(cartId: ID!, productId: ID!, quantity: Int!): Cart
     removeFromCart(cartId: ID!, productId: ID!): Cart
     updateCartProductQuantity(cartId: ID!, productId: ID!, quantity: Int!): Cart
     deleteCart(id: ID!): Cart
 
     createOrder(
-      userId: ID!
       products: [OrderProductInput!]!
       totalAmount: Float!
       address: String!
@@ -183,12 +184,10 @@ const typeDefs = gql`
       totalAmount: Float
       address: String
       status: String
+      userId: ID!
     ): Order
 
-    deleteOrder(id: ID!): Order
-
     createReview(
-      userId: ID!
       productId: ID!
       rating: Float!
       comment: String!
