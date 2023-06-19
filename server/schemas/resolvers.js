@@ -634,6 +634,73 @@ const resolvers = {
         throw new Error("Failed to create order");
       }
     },
+
+    // Create a user review for a product
+    createReview: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Create a review with the provided arguments and assign it to the authenticated user
+        const review = await Review.create({
+          ...args,
+          user: context.user._id,
+        });
+        return review;
+      } catch (error) {
+        throw new Error("Failed to create review");
+      }
+    },
+
+    // Allow a user to update their existing review
+    updateReview: async (parent, { id, rating, comment }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Find and update the review matching the provided ID and authenticated user
+        const review = await Review.findOneAndUpdate(
+          { _id: id, user: context.user._id },
+          { $set: { rating: rating, comment: comment } },
+          { new: true }
+        );
+        if (!review) {
+          throw new Error(
+            "Review not found or you are not authorized to update it"
+          );
+        }
+
+        return review;
+      } catch (error) {
+        throw new Error("Failed to update review");
+      }
+    },
+
+    // Allow a user to delete their review
+    deleteReview: async (parent, { id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Find and delete the review matching the provided ID and authenticated user
+        const review = await Review.findOneAndDelete({
+          _id: id,
+          user: context.user._id,
+        });
+        if (!review) {
+          throw new Error(
+            "Review not found or you are not authorized to delete it"
+          );
+        }
+
+        return review;
+      } catch (error) {
+        throw new Error("Failed to delete review");
+      }
+    },
   },
 };
 
