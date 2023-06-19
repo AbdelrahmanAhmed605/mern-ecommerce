@@ -590,6 +590,50 @@ const resolvers = {
         throw new Error("Failed to delete cart");
       }
     },
+
+    // Create an order when the user purchases the items in their cart
+    createOrder: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Create the order with the provided arguments and assign it to the authenticated user
+        const order = await Order.create({
+          ...args,
+          user: context.user._id,
+        });
+
+        // Check if the products in the order are all available in stock. If there is enough quantities of the
+        // products in stock, then complete the order and update the stock
+        const productUpdates = args.products.map(async (productInput) => {
+          const { productId, orderQuantity } = productInput;
+          // Find the product by ID
+          const product = await Product.findById(productId);
+          if (!product) {
+            throw new Error(`Product with ID ${productId} not found`);
+          }
+
+          // Check if the product has sufficient quantity in stock
+          if (product.quantity < orderQuantity) {
+            throw new Error(
+              `Insufficient quantity for product ${product.title}`
+            );
+          }
+
+          // Subtract the ordered quantity from the product's stock quantity
+          product.quantity -= orderQuantity;
+          await product.save();
+        });
+
+        // Wait for all product updates to complete
+        await Promise.all(productUpdates);
+
+        return order;
+      } catch (error) {
+        throw new Error("Failed to create order");
+      }
+    },
   },
 };
 
