@@ -701,6 +701,117 @@ const resolvers = {
         throw new Error("Failed to delete review");
       }
     },
+
+    // ---------- FOR ADMIN USE ----------
+
+    // Allow an admin to add a product to the store
+    createProduct: async (parent, args, context) => {
+      try {
+        // Check if the user is authenticated and has the "admin" role
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        if (context.user.role !== "admin") {
+          throw new AuthenticationError("Only admin users can create products");
+        }
+
+        // Destructure the "quantity" field from the args and assign a default value of 0 if not provided
+        const { quantity = 0, ...productArgs } = args;
+
+        // Create a new product with the provided arguments
+        const product = await Product.create({
+          ...productArgs,
+          user: context.user._id,
+          quantity,
+        });
+
+        return product;
+      } catch (error) {
+        // Handle specific validation errors and MongoDB errors
+        if (error.name === "ValidationError") {
+          // Validation error occurred in the model schema
+          const validationErrors = Object.values(error.errors).map(
+            (err) => err.message
+          );
+          throw new UserInputError("Validation errors", {
+            validationErrors,
+          });
+        } else if (error.name === "MongoError" && error.code === 11000) {
+          // MongoDB duplicate key error
+          throw new UserInputError("Product already exists");
+        } else {
+          // Generic error if failed to create the product
+          throw new Error("Failed to create product");
+        }
+      }
+    },
+
+    // Allow admins to update a products information
+    updateProduct: async (parent, args, context) => {
+      try {
+        // Ensure the requesting user is an admin
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        if (context.user.role !== "admin") {
+          throw new AuthenticationError("Only admin users can update products");
+        }
+
+        // Find and update the product with the provided ID and owned by the authenticated user
+        const product = await Product.findOneAndUpdate(
+          { _id: args.id, user: context.user._id },
+          { ...args },
+          { new: true }
+        );
+
+        if (!product) {
+          throw new Error(
+            "Product not found or you are not authorized to update it"
+          );
+        }
+
+        return product;
+      } catch (error) {
+        // Handle specific validation errors and MongoDB errors
+        if (error.name === "ValidationError") {
+          // Validation error occurred in the model schema
+          const validationErrors = Object.values(error.errors).map(
+            (err) => err.message
+          );
+          throw new UserInputError("Validation errors", {
+            validationErrors,
+          });
+        } else {
+          throw new Error("Failed to update product");
+        }
+      }
+    },
+
+    // Allow an admin to delete an existing product
+    deleteProduct: async (parent, { id }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        if (context.user.role !== "admin") {
+          throw new AuthenticationError("Only admin users can delete products");
+        }
+
+        const product = await Product.findOneAndDelete({
+          _id: id,
+          user: context.user._id,
+        });
+        if (!product) {
+          throw new Error(
+            "Product not found or you are not authorized to delete it"
+          );
+        }
+
+        return product;
+      } catch (error) {
+        throw new Error("Failed to delete product");
+      }
+    },
   },
 };
 
