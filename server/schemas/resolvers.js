@@ -812,6 +812,35 @@ const resolvers = {
         throw new Error("Failed to delete product");
       }
     },
+
+    // ---------- FOR DEVELOPER AND ADMIN USE ----------
+
+    // Update an order's existing information
+    updateOrder: async (parent, args, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        // Check if the user has admin or developer role
+        if (context.user.role == "user") {
+          throw new Error("You are not authorized to update orders");
+        }
+
+        // Find and update the order with the provided ID
+        const order = await Order.findByIdAndUpdate(args.id, args, {
+          new: true,
+        });
+        if (!order) {
+          throw new Error(
+            "Order not found or you are not authorized to update it"
+          );
+        }
+
+        return order;
+      } catch (error) {
+        throw new Error("Failed to update order");
+      }
+    },
   },
 };
 
