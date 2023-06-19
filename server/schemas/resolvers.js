@@ -1,4 +1,5 @@
 const { AuthenticationError, UserInputError } = require("apollo-server-errors");
+const { signToken } = require("../utils/auth");
 const { User, Product, Category, Cart, Order, Review } = require("../models");
 
 const resolvers = {
