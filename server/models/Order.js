@@ -32,7 +32,7 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "shipped", "delivered"], // Status can only have the values "pending", "shipped", or "delivered"
+      enum: ["pending", "shipped", "delivered", "canceled"], // Status can only have the values "pending", "shipped", "delivered", or "canceled"
       default: "pending", // Default status is "pending" if not specified
     },
   },

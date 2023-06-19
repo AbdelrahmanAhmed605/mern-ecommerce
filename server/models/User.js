@@ -1,15 +1,21 @@
 const { Schema, model, Types } = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 
 const userSchema = new Schema(
   {
+    role: {
+      type: String,
+      enum: ["user", "developer", "admin"],
+      default: "user",
+    },
     username: {
       type: String,
       required: [true, "Username is required"],
-      unique: true,
-      minlength: 3,
-      maxlength: 20,
+      unique: [true, "Username '{VALUE}' already exists."],
+      minlength: [3, "Username must be at least 3 characters long"],
+      maxlength: [20, "Username must be less than 20 characters long"],
       validate: {
         validator: (value) => /^[a-zA-Z0-9_.-]+$/.test(value),
         message:
@@ -26,8 +32,8 @@ const userSchema = new Schema(
     },
     email: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, "Email is required"],
+      unique: [true, "Email '{VALUE}' already exists."],
       validate: {
         validator: (value) => validator.isEmail(value),
         message: "Must use a valid email address",
@@ -54,7 +60,7 @@ const userSchema = new Schema(
     phone: {
       type: String,
       required: true,
-      unique: true,
+      unique: [true, "Phone Number '{VALUE}' already exists."],
       validate: {
         validator: (value) => {
           // Custom validation: Check if the value is a valid mobile phone number
@@ -63,32 +69,6 @@ const userSchema = new Schema(
         message: "Please enter a valid phone number",
       },
     },
-    // stores items in the users shopping cart
-    cart: {
-      type: Schema.Types.ObjectId,
-      ref: "Cart",
-    },
-    // stores the users purchased orders
-    orders: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Order",
-      },
-    ],
-    // stores the users product reviews
-    reviews: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Review",
-      },
-    ],
-    // stores the users uploaded products that they have submitted to the marketplace
-    products: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
   },
   { timestamps: true }
 );
@@ -116,6 +96,11 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.isCorrectPassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
+
+// ---------- PLUGINS ----------
+
+// Apply the uniqueValidator plugin to the userSchema
+userSchema.plugin(uniqueValidator);
 
 const User = model("User", userSchema);
 
