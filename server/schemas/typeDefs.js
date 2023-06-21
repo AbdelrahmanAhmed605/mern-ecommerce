@@ -8,7 +8,7 @@ const typeDefs = gql`
 
   type User {
     _id: ID!
-    role: String! 
+    role: String!
     username: String!
     firstName: String!
     lastName: String!
@@ -66,7 +66,7 @@ const typeDefs = gql`
 
   type OrderProduct {
     product: Product!
-    quantity: Int!
+    orderQuantity: Int!
   }
 
   type Review {
@@ -122,6 +122,7 @@ const typeDefs = gql`
     createUser(
       role: String!
       username: String!
+      password: String!
       firstName: String!
       lastName: String!
       email: String!
@@ -165,7 +166,7 @@ const typeDefs = gql`
     updateCategory(id: ID!, name: String): Category
     deleteCategory(id: ID!): Category
 
-    createCart(): Cart
+    createCart: Cart
     addToCart(cartId: ID!, productId: ID!, quantity: Int!): Cart
     removeFromCart(cartId: ID!, productId: ID!): Cart
     updateCartProductQuantity(cartId: ID!, productId: ID!, quantity: Int!): Cart
@@ -187,19 +188,17 @@ const typeDefs = gql`
       userId: ID!
     ): Order
 
-    createReview(
-      productId: ID!
-      rating: Float!
-      comment: String!
-    ): Review
+    createReview(productId: ID!, rating: Float!, comment: String!): Review
 
     updateReview(id: ID!, rating: Float, comment: String): Review
     deleteReview(id: ID!): Review
+
+    adminDeleteUser(userId: ID!): User
   }
 
   input OrderProductInput {
     productId: ID!
-    quantity: Int!
+    orderQuantity: Int!
   }
 `;
 

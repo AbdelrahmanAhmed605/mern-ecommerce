@@ -1,6 +1,32 @@
-const { AuthenticationError, UserInputError } = require("apollo-server-errors");
+const {
+  AuthenticationError,
+  UserInputError,
+  ForbiddenError,
+} = require("apollo-server-errors");
 const { signToken } = require("../utils/auth");
 const { User, Product, Category, Cart, Order, Review } = require("../models");
+
+// Helper function to update the average rating of a product
+const updateProductAverageRating = async (productId) => {
+  const product = await Product.findById(productId).populate("reviews");
+
+  if (!product) {
+    throw new UserInputError("Product not found");
+  }
+
+  // Calculate the average rating
+  if (product.reviews.length > 0) {
+    const totalRating = product.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    product.averageRating = totalRating / product.reviews.length;
+  } else {
+    product.averageRating = 0; // No reviews, set average rating to 0
+  }
+
+  await product.save();
+};
 
 const resolvers = {
   Query: {
@@ -19,7 +45,14 @@ const resolvers = {
 
         return currentUser;
       } catch (error) {
-        throw new Error("Failed to fetch user");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch user");
+        }
       }
     },
 
@@ -34,7 +67,11 @@ const resolvers = {
 
         return user;
       } catch (error) {
-        throw new Error("Failed to fetch user");
+        if (error instanceof UserInputError) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch user");
+        }
       }
     },
 
@@ -45,6 +82,7 @@ const resolvers = {
         const products = await Product.find()
           .populate("categories")
           .populate("user")
+          .populate("reviews")
           .skip(skip)
           .limit(pageSize); // Retrieve only the specified number of products per page
         return products;
@@ -67,7 +105,11 @@ const resolvers = {
 
         return product;
       } catch (error) {
-        throw new Error("Failed to fetch product");
+        if (error instanceof UserInputError) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch product");
+        }
       }
     },
 
@@ -161,15 +203,26 @@ const resolvers = {
     },
 
     // Resolver for fetching a single category by ID
-    category: async (parent, { id }) => {
+    category: async (parent, { id }, context) => {
       try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
         const category = await Category.findById(id);
         if (!category) {
           throw new UserInputError("Category not found");
         }
         return category;
       } catch (error) {
-        throw new Error("Failed to fetch category");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch category");
+        }
       }
     },
 
@@ -187,6 +240,9 @@ const resolvers = {
 
         return cart;
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         throw new Error("Failed to fetch cart");
       }
     },
@@ -210,7 +266,14 @@ const resolvers = {
 
         return order;
       } catch (error) {
-        throw new Error("Failed to fetch order");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch order");
+        }
       }
     },
 
@@ -228,6 +291,9 @@ const resolvers = {
 
         return orders;
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         throw new Error("Failed to fetch orders");
       }
     },
@@ -263,7 +329,11 @@ const resolvers = {
 
         return order;
       } catch (error) {
-        throw new Error("Failed to fetch order");
+        if (error instanceof UserInputError) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch order");
+        }
       }
     },
 
@@ -405,6 +475,11 @@ const resolvers = {
             invalidArgs: args,
             validationErrors: errorMessages,
           });
+        } else if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
         } else {
           // Throwing a generic error message when failed to update a user
           throw new Error("Failed to update user");
@@ -422,6 +497,9 @@ const resolvers = {
         const user = await User.findByIdAndDelete(context.user._id);
         return user;
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         throw new Error("Failed to delete user");
       }
     },
@@ -443,6 +521,9 @@ const resolvers = {
         // Return the created cart
         return cart;
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         throw new Error("Failed to create cart");
       }
     },
@@ -472,6 +553,9 @@ const resolvers = {
 
         return cart;
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         throw new Error("Failed to add item to cart");
       }
     },
@@ -485,13 +569,13 @@ const resolvers = {
 
         const product = await Product.findById(productId);
         if (!product) {
-          throw new Error("Product not found");
+          throw new UserInputError("Product not found");
         }
 
         // Find the cart by its ID and ensure it exists
         const cart = await Cart.findById(cartId);
         if (!cart) {
-          throw new Error("Cart not found");
+          throw new UserInputError("Cart not found");
         }
 
         // Find the product to be removed from the cart
@@ -500,7 +584,7 @@ const resolvers = {
         );
         // If the product to be removed is not found in the cart, throw an error
         if (!removedProduct) {
-          throw new Error("Product not found in cart");
+          throw new UserInputError("Product not found in cart");
         }
 
         // Calculate the reduction in the total price based on the removed product's quantity and price
@@ -517,7 +601,14 @@ const resolvers = {
         await cart.save();
         return cart;
       } catch (error) {
-        throw new Error("Failed to remove item from cart");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to remove item from cart");
+        }
       }
     },
 
@@ -534,12 +625,12 @@ const resolvers = {
 
         const product = await Product.findById(productId);
         if (!product) {
-          throw new Error("Product not found");
+          throw new UserInputError("Product not found");
         }
 
         const cart = await Cart.findById(cartId);
         if (!cart) {
-          throw new Error("Cart not found");
+          throw new UserInputError("Cart not found");
         }
 
         // Find the product in the cart to update its quantity
@@ -548,7 +639,7 @@ const resolvers = {
         );
         // If the product is not found in the cart, throw an error
         if (!changedProduct) {
-          throw new Error("Product not found in cart");
+          throw new UserInputError("Product not found in cart");
         }
 
         // Calculate the change in the total price based on the difference between the new quantity and the old quantity, multiplied by the product's price
@@ -563,7 +654,14 @@ const resolvers = {
 
         return cart;
       } catch (error) {
-        throw new Error("Failed to update product quantity in cart");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to update product quantity in cart");
+        }
       }
     },
 
@@ -581,58 +679,88 @@ const resolvers = {
         });
         // If the cart is not found or the user is not authorized to delete it, throw an error
         if (!cart) {
-          throw new Error(
+          throw new UserInputError(
             "Cart not found or you are not authorized to delete it"
           );
         }
 
         return cart;
       } catch (error) {
-        throw new Error("Failed to delete cart");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to delete cart");
+        }
       }
     },
 
-    // Create an order when the user purchases the items in their cart
     createOrder: async (parent, args, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
         }
 
-        // Create the order with the provided arguments and assign it to the authenticated user
-        const order = await Order.create({
-          ...args,
-          user: context.user._id,
-        });
-
-        // Check if the products in the order are all available in stock. If there is enough quantities of the
-        // products in stock, then complete the order and update the stock
+        // Check if the products in the order are all available in stock
         const productUpdates = args.products.map(async (productInput) => {
           const { productId, orderQuantity } = productInput;
           // Find the product by ID
           const product = await Product.findById(productId);
           if (!product) {
-            throw new Error(`Product with ID ${productId} not found`);
+            throw new UserInputError(`Product with ID ${productId} not found`);
           }
 
           // Check if the product has sufficient quantity in stock
           if (product.quantity < orderQuantity) {
-            throw new Error(
+            throw new UserInputError(
               `Insufficient stock for product '${product.title}'. Only ${product.quantity} units left in stock.`
             );
           }
 
-          // Subtract the ordered quantity from the product's stock quantity
-          product.quantity -= orderQuantity;
-          await product.save();
+          return {
+            product,
+            orderQuantity,
+          };
         });
 
         // Wait for all product updates to complete
-        await Promise.all(productUpdates);
+        const productsToUpdate = await Promise.all(productUpdates);
+
+        // Create the order with the provided arguments and assign it to the authenticated user
+        const order = await Order.create({
+          ...args,
+          products: productsToUpdate.map((productUpdate) => ({
+            product: productUpdate.product._id,
+            orderQuantity: productUpdate.orderQuantity,
+          })),
+          user: context.user._id,
+        });
+
+        // Update the purchased product's stock quantities after the order is successfully created
+        const productUpdatesAfterOrder = productsToUpdate.map(
+          async (productUpdate) => {
+            const { product, orderQuantity } = productUpdate;
+            // Subtract the ordered quantity from the product's stock quantity
+            product.quantity -= orderQuantity;
+            await product.save();
+          }
+        );
+
+        // Wait for all product updates after order creation to complete
+        await Promise.all(productUpdatesAfterOrder);
 
         return order;
       } catch (error) {
-        throw new Error("Failed to create order");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to create order");
+        }
       }
     },
 
@@ -646,11 +774,27 @@ const resolvers = {
         // Create a review with the provided arguments and assign it to the authenticated user
         const review = await Review.create({
           ...args,
+          product: args.productId,
           user: context.user._id,
         });
+
+        // Add the review to the product's reviews array
+        const product = await Product.findByIdAndUpdate(
+          args.productId,
+          { $push: { reviews: review._id } },
+          { new: true }
+        );
+
+        // Update the product's average rating
+        await updateProductAverageRating(args.productId);
+
         return review;
       } catch (error) {
-        throw new Error("Failed to create review");
+        if (error instanceof AuthenticationError) {
+          throw error;
+        } else {
+          throw new Error("Failed to create review");
+        }
       }
     },
 
@@ -668,14 +812,24 @@ const resolvers = {
           { new: true }
         );
         if (!review) {
-          throw new Error(
+          throw new UserInputError(
             "Review not found or you are not authorized to update it"
           );
         }
 
+        // Update the product's average rating
+        await updateProductAverageRating(review.product);
+
         return review;
       } catch (error) {
-        throw new Error("Failed to update review");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to update review");
+        }
       }
     },
 
@@ -692,14 +846,31 @@ const resolvers = {
           user: context.user._id,
         });
         if (!review) {
-          throw new Error(
+          throw new UserInputError(
             "Review not found or you are not authorized to delete it"
           );
         }
 
+        // Add the review to the product's reviews array
+        const product = await Product.findByIdAndUpdate(
+          review.product,
+          { $pull: { reviews: review._id } },
+          { new: true }
+        );
+
+        // Update the product's average rating
+        await updateProductAverageRating(review.product);
+
         return review;
       } catch (error) {
-        throw new Error("Failed to delete review");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to delete review");
+        }
       }
     },
 
@@ -713,7 +884,7 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
         if (context.user.role !== "admin") {
-          throw new AuthenticationError("Only admin users can create products");
+          throw new ForbiddenError("Only admin users can create products");
         }
 
         // Destructure the "quantity" field from the args and assign a default value of 0 if not provided
@@ -740,6 +911,11 @@ const resolvers = {
         } else if (error.name === "MongoError" && error.code === 11000) {
           // MongoDB duplicate key error
           throw new UserInputError("Product already exists");
+        } else if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
         } else {
           // Generic error if failed to create the product
           throw new Error("Failed to create product");
@@ -755,7 +931,7 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
         if (context.user.role !== "admin") {
-          throw new AuthenticationError("Only admin users can update products");
+          throw new ForbiddenError("Only admin users can update products");
         }
 
         // Find and update the product with the provided ID and owned by the authenticated user
@@ -766,7 +942,7 @@ const resolvers = {
         );
 
         if (!product) {
-          throw new Error(
+          throw new UserInputError(
             "Product not found or you are not authorized to update it"
           );
         }
@@ -782,6 +958,12 @@ const resolvers = {
           throw new UserInputError("Validation errors", {
             validationErrors,
           });
+        } else if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
         } else {
           throw new Error("Failed to update product");
         }
@@ -795,7 +977,7 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
         if (context.user.role !== "admin") {
-          throw new AuthenticationError("Only admin users can delete products");
+          throw new ForbiddenError("Only admin users can delete products");
         }
 
         const product = await Product.findOneAndDelete({
@@ -803,14 +985,46 @@ const resolvers = {
           user: context.user._id,
         });
         if (!product) {
-          throw new Error(
+          throw new UserInputError(
             "Product not found or you are not authorized to delete it"
           );
         }
 
         return product;
       } catch (error) {
-        throw new Error("Failed to delete product");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to delete product");
+        }
+      }
+    },
+
+    // Allow admin to delete existing users
+    adminDeleteUser: async (parent, { userId }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        if (context.user.role !== "admin") {
+          throw new ForbiddenError("Only admin users can delete other users");
+        }
+
+        const user = await User.findByIdAndDelete(userId);
+        return user;
+      } catch (error) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to delete user");
+        }
       }
     },
 
@@ -823,23 +1037,66 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
         // Check if the user has admin or developer role
-        if (context.user.role == "user") {
-          throw new Error("You are not authorized to update orders");
+        if (context.user.role === "user") {
+          throw new ForbiddenError("You are not authorized to update orders");
         }
 
-        // Find and update the order with the provided ID
-        const order = await Order.findByIdAndUpdate(args.id, args, {
-          new: true,
-        });
+        // Find the order by ID
+        const order = await Order.findById(args.id);
         if (!order) {
-          throw new Error(
+          throw new UserInputError(
             "Order not found or you are not authorized to update it"
           );
         }
 
-        return order;
+        // Check if the status is being updated to "canceled"
+        if (args.status === "canceled" && order.status !== "canceled") {
+          // Update the status to "canceled"
+          order.status = "canceled";
+          await order.save();
+
+          // Retrieve the products in the canceled order
+          const productsInOrder = order.products;
+
+          // Update the stock quantities of the products in the canceled order
+          const productUpdatesAfterCancellation = productsInOrder.map(
+            async (productInOrder) => {
+              const { product, orderQuantity } = productInOrder;
+              // Find the product by ID
+              const foundProduct = await Product.findById(product);
+              if (!foundProduct) {
+                throw new UserInputError(
+                  `Product with ID ${product} not found`
+                );
+              }
+
+              // Add the canceled order quantity back to the product's stock quantity
+              foundProduct.quantity += orderQuantity;
+              await foundProduct.save();
+            }
+          );
+
+          // Wait for all product updates after order cancellation to complete
+          await Promise.all(productUpdatesAfterCancellation);
+        } else {
+          // Update the order with the provided arguments
+          await Order.findByIdAndUpdate(args.id, args);
+        }
+
+        // Retrieve the updated order
+        const updatedOrder = await Order.findById(args.id);
+
+        return updatedOrder;
       } catch (error) {
-        throw new Error("Failed to update order");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to update order");
+        }
       }
     },
 
@@ -850,15 +1107,22 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
         if (context.user.role === "user") {
-          throw new AuthenticationError(
-            "Only admin or developer users can create categories"
+          throw new ForbiddenError(
+            "You are not authorized to create categories"
           );
         }
 
-        const category = await Category.create(name);
+        const category = await Category.create({ name });
         return category;
       } catch (error) {
-        throw new Error("Failed to create category");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to create category");
+        }
       }
     },
 
@@ -869,7 +1133,7 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
         if (context.user.role === "user") {
-          throw new AuthenticationError(
+          throw new ForbiddenError(
             "Only admin or developer users can update categories"
           );
         }
@@ -878,14 +1142,22 @@ const resolvers = {
           new: true,
         });
         if (!category) {
-          throw new Error(
+          throw new UserInputError(
             "Category not found or you are not authorized to update it"
           );
         }
 
         return category;
       } catch (error) {
-        throw new Error("Failed to update category");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to update category");
+        }
       }
     },
 
@@ -897,21 +1169,29 @@ const resolvers = {
         }
 
         if (context.user.role == "user") {
-          throw new AuthenticationError(
+          throw new ForbiddenError(
             "Only admin or developer users can delete categories"
           );
         }
 
         const category = await Category.findByIdAndDelete(id);
         if (!category) {
-          throw new Error(
+          throw new UserInputError(
             "Category not found or you are not authorized to delete it"
           );
         }
 
         return category;
       } catch (error) {
-        throw new Error("Failed to delete category");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to delete category");
+        }
       }
     },
   },
