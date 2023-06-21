@@ -59,27 +59,51 @@ const cartResolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
 
-        // Find the product by its ID and check the product exists
+        // Find the product by its ID and check if the product exists
         const product = await Product.findById(productId);
         if (!product) {
           throw new UserInputError("Product not found");
         }
 
-          const user = await User.findById(context.user._id);
-          const cartId = user.cart;
+        const user = await User.findById(context.user._id);
+        const cartId = user.cart;
 
-        // Update the cart by adding the product and its quantity as well as updating the total price of the cart
-        const cart = await Cart.findOneAndUpdate(
-          { _id: cartId, user: context.user._id },
-          {
-            $push: { products: { product: productId, quantity } },
-            $inc: { totalPrice: quantity * product.price }, // Increment the total price by the added quantity multiplied by the product's price
-          },
-          { new: true }
+        // Check if the product already exists in the cart
+        const existingProduct = await Cart.findOne(
+          { _id: cartId, "products.product": productId },
+          { "products.$": 1 }
+        );
+
+        let cart;
+
+        if (existingProduct) {
+          // If the product exists, update its quantity
+          const existingQuantity = existingProduct.products[0].quantity;
+          const newQuantity = existingQuantity + quantity;
+
+          cart = await Cart.findOneAndUpdate(
+            { _id: cartId, "products.product": productId },
+            {
+              $set: { "products.$.quantity": newQuantity },
+              $inc: { totalPrice: quantity * product.price }, // Increment the total price by the added quantity multiplied by the product's price
+            },
+            { new: true }
           );
-          if (!cart) {
-            throw new UserInputError("Cart not found");
-          }
+        } else {
+          // If the product does not exist, add it to the cart
+          cart = await Cart.findOneAndUpdate(
+            { _id: cartId, user: context.user._id },
+            {
+              $push: { products: { product: productId, quantity } },
+              $inc: { totalPrice: quantity * product.price }, // Increment the total price by the added quantity multiplied by the product's price
+            },
+            { new: true }
+          );
+        }
+
+        if (!cart) {
+          throw new UserInputError("Cart not found");
+        }
 
         return cart;
       } catch (error) {

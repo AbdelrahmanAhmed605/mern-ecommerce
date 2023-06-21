@@ -3,7 +3,7 @@ const {
   UserInputError,
   ForbiddenError,
 } = require("apollo-server-errors");
-const { Order, Product } = require("../../models");
+const { Order, Product, Cart, User } = require("../../models");
 
 const orderResolvers = {
   Query: {
@@ -148,6 +148,22 @@ const orderResolvers = {
 
         // Wait for all product updates after order creation to complete
         await Promise.all(productUpdatesAfterOrder);
+
+        // Since Orders will be created using items in the cart, once an order is made, we can clear the cart
+        // Delete the user's cart
+        const user = await User.findById(context.user._id);
+        const cartId = user.cart;
+        await Cart.findByIdAndDelete(cartId);
+
+        // Create a new cart with initial values
+        const cart = await Cart.create({
+          user: context.user._id,
+          products: [],
+          totalPrice: 0,
+        });
+
+        // Update the user's cart reference
+        await User.findByIdAndUpdate(context.user._id, { cart: cart._id });
 
         return order;
       } catch (error) {
