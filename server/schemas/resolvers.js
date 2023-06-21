@@ -37,7 +37,9 @@ const resolvers = {
       }
 
       try {
-        const currentUser = await User.findOne({ _id: context.user._id });
+        const currentUser = await User.findOne({
+          _id: context.user._id,
+        }).populate("cart");
 
         if (!currentUser) {
           throw new UserInputError("User not found");
@@ -59,7 +61,7 @@ const resolvers = {
     // Resolver for fetching a single user by ID
     singleUser: async (parent, { userId }) => {
       try {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("products");
 
         if (!user) {
           throw new UserInputError("User not found");
@@ -256,7 +258,7 @@ const resolvers = {
         }
 
         const order = await Order.findById(id).populate({
-          path: "products.product",
+          path: "products.productId",
           model: "Product",
         });
 
@@ -319,7 +321,7 @@ const resolvers = {
     developerOrder: async (parent, { orderId }) => {
       try {
         const order = await Order.findById(orderId).populate({
-          path: "products.product",
+          path: "products.productId",
           model: "Product",
         });
 
@@ -518,6 +520,9 @@ const resolvers = {
           totalPrice: 0,
         });
 
+        // Update the user's cart reference
+        await User.findByIdAndUpdate(context.user._id, { cart: cart._id });
+
         // Return the created cart
         return cart;
       } catch (error) {
@@ -529,7 +534,7 @@ const resolvers = {
     },
 
     // Add a product with a specified quantity to the shopping cart
-    addToCart: async (parent, { cartId, productId, quantity }, context) => {
+    addToCart: async (parent, { productId, quantity }, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
@@ -540,6 +545,9 @@ const resolvers = {
         if (!product) {
           throw new Error("Product not found");
         }
+
+        // Get the cart ID from the user's cart property
+        const cartId = context.user.cart;
 
         // Update the cart by adding the product and its quantity as well as updating the total price of the cart
         const cart = await Cart.findOneAndUpdate(
@@ -561,7 +569,7 @@ const resolvers = {
     },
 
     // Remove a product from the cart
-    removeFromCart: async (parent, { cartId, productId }, context) => {
+    removeFromCart: async (parent, { productId }, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
@@ -572,6 +580,7 @@ const resolvers = {
           throw new UserInputError("Product not found");
         }
 
+        const cartId = context.user.cart;
         // Find the cart by its ID and ensure it exists
         const cart = await Cart.findById(cartId);
         if (!cart) {
@@ -615,7 +624,7 @@ const resolvers = {
     // Update the quantity of a product in the cart
     updateCartProductQuantity: async (
       parent,
-      { cartId, productId, quantity },
+      { productId, quantity },
       context
     ) => {
       try {
@@ -628,6 +637,7 @@ const resolvers = {
           throw new UserInputError("Product not found");
         }
 
+        const cartId = context.user.cart;
         const cart = await Cart.findById(cartId);
         if (!cart) {
           throw new UserInputError("Cart not found");
@@ -666,15 +676,16 @@ const resolvers = {
     },
 
     // Delete the user's cart
-    deleteCart: async (parent, { id }, context) => {
+    deleteCart: async (parent, agrs, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
         }
 
+        const cartId = context.user.cart;
         // Find and delete the cart matching the provided ID and owned by the authenticated user
         const cart = await Cart.findOneAndDelete({
-          _id: id,
+          _id: cartId,
           user: context.user._id,
         });
         // If the cart is not found or the user is not authorized to delete it, throw an error
@@ -713,9 +724,9 @@ const resolvers = {
           }
 
           // Check if the product has sufficient quantity in stock
-          if (product.quantity < orderQuantity) {
+          if (product.stockQuantity < orderQuantity) {
             throw new UserInputError(
-              `Insufficient stock for product '${product.title}'. Only ${product.quantity} units left in stock.`
+              `Insufficient stock for product '${product.title}'. Only ${product.stockQuantity} units left in stock.`
             );
           }
 
@@ -731,10 +742,6 @@ const resolvers = {
         // Create the order with the provided arguments and assign it to the authenticated user
         const order = await Order.create({
           ...args,
-          products: productsToUpdate.map((productUpdate) => ({
-            product: productUpdate.product._id,
-            orderQuantity: productUpdate.orderQuantity,
-          })),
           user: context.user._id,
         });
 
@@ -743,7 +750,7 @@ const resolvers = {
           async (productUpdate) => {
             const { product, orderQuantity } = productUpdate;
             // Subtract the ordered quantity from the product's stock quantity
-            product.quantity -= orderQuantity;
+            product.stockQuantity -= orderQuantity;
             await product.save();
           }
         );
@@ -888,13 +895,18 @@ const resolvers = {
         }
 
         // Destructure the "quantity" field from the args and assign a default value of 0 if not provided
-        const { quantity = 0, ...productArgs } = args;
+        const { stockQuantity = 0, ...productArgs } = args;
 
         // Create a new product with the provided arguments
         const product = await Product.create({
           ...productArgs,
           user: context.user._id,
-          quantity,
+          stockQuantity,
+        });
+
+        // Add the created product's ID to the user's products array
+        await User.findByIdAndUpdate(context.user._id, {
+          $push: { products: product._id },
         });
 
         return product;
@@ -990,6 +1002,11 @@ const resolvers = {
           );
         }
 
+        // Remove the created product's ID to the user's products array
+        await User.findByIdAndUpdate(context.user._id, {
+          $pull: { products: product._id },
+        });
+
         return product;
       } catch (error) {
         if (
@@ -1061,17 +1078,17 @@ const resolvers = {
           // Update the stock quantities of the products in the canceled order
           const productUpdatesAfterCancellation = productsInOrder.map(
             async (productInOrder) => {
-              const { product, orderQuantity } = productInOrder;
+              const { productId, orderQuantity } = productInOrder;
               // Find the product by ID
-              const foundProduct = await Product.findById(product);
+              const foundProduct = await Product.findById(productId);
               if (!foundProduct) {
                 throw new UserInputError(
-                  `Product with ID ${product} not found`
+                  `Product with ID ${productId} not found`
                 );
               }
 
               // Add the canceled order quantity back to the product's stock quantity
-              foundProduct.quantity += orderQuantity;
+              foundProduct.stockQuantity += orderQuantity;
               await foundProduct.save();
             }
           );

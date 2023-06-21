@@ -15,6 +15,8 @@ const typeDefs = gql`
     email: String!
     address: String!
     phone: String!
+    cart: Cart
+    products: [Product!]
     createdAt: String!
     updatedAt: String!
   }
@@ -25,7 +27,7 @@ const typeDefs = gql`
     averageRating: Float!
     description: String!
     price: Float!
-    quantity: Int!
+    stockQuantity: Int!
     image: String!
     categories: [Category!]!
     user: User
@@ -65,7 +67,7 @@ const typeDefs = gql`
   }
 
   type OrderProduct {
-    product: Product!
+    productId: Product!
     orderQuantity: Int!
   }
 
@@ -145,7 +147,7 @@ const typeDefs = gql`
       title: String!
       description: String!
       price: Float!
-      quantity: Int!
+      stockQuantity: Int!
       image: String!
       categories: [ID!]!
     ): Product
@@ -155,7 +157,7 @@ const typeDefs = gql`
       title: String
       description: String
       price: Float
-      quantity: Int
+      stockQuantity: Int
       image: String
       categories: [ID!]
     ): Product
@@ -167,10 +169,10 @@ const typeDefs = gql`
     deleteCategory(id: ID!): Category
 
     createCart: Cart
-    addToCart(cartId: ID!, productId: ID!, quantity: Int!): Cart
-    removeFromCart(cartId: ID!, productId: ID!): Cart
-    updateCartProductQuantity(cartId: ID!, productId: ID!, quantity: Int!): Cart
-    deleteCart(id: ID!): Cart
+    addToCart(productId: ID!, quantity: Int!): Cart
+    removeFromCart(productId: ID!): Cart
+    updateCartProductQuantity(productId: ID!, quantity: Int!): Cart
+    deleteCart: Cart
 
     createOrder(
       products: [OrderProductInput!]!

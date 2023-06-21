@@ -69,6 +69,16 @@ const userSchema = new Schema(
         message: "Please enter a valid phone number",
       },
     },
+    cart: {
+      type: Schema.Types.ObjectId,
+      ref: "Cart",
+    },
+    products: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true }
 );
