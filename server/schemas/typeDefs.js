@@ -170,7 +170,7 @@ const typeDefs = gql`
     addToCart(productId: ID!, quantity: Int!): Cart
     removeFromCart(productId: ID!): Cart
     updateCartProductQuantity(productId: ID!, quantity: Int!): Cart
-    deleteCart: Cart
+    resetCart: Cart
 
     createOrder(
       products: [OrderProductInput!]!

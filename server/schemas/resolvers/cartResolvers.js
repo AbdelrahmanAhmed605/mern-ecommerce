@@ -226,8 +226,9 @@ const cartResolvers = {
       }
     },
 
-    // Delete the user's cart
-    deleteCart: async (parent, agrs, context) => {
+    // Delete the user's current cart and creates a new empty one since a user should always have a cart
+    // This is an easier implementation instead of de-selecting all the items in the cart
+    resetCart: async (parent, agrs, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
@@ -236,18 +237,31 @@ const cartResolvers = {
         const user = await User.findById(context.user._id);
         const cartId = user.cart;
         // Find and delete the cart matching the provided ID and owned by the authenticated user
-        const cart = await Cart.findOneAndDelete({
+        const deletedCart = await Cart.findOneAndDelete({
           _id: cartId,
           user: context.user._id,
         });
         // If the cart is not found or the user is not authorized to delete it, throw an error
-        if (!cart) {
+        if (!deletedCart) {
           throw new UserInputError(
             "Cart not found or you are not authorized to delete it"
           );
         }
 
-        return cart;
+        // Since a user should always have a cart, when a user deletes their cart (easier implementation to
+        // deselect all items in the cart), we create a new cart
+
+        // Create a new cart with initial values
+        const newCart = await Cart.create({
+          user: context.user._id,
+          products: [],
+          totalPrice: 0,
+        });
+
+        // Update the user's cart reference
+        await User.findByIdAndUpdate(context.user._id, { cart: newCart._id });
+
+        return newCart;
       } catch (error) {
         if (
           error instanceof AuthenticationError ||

@@ -392,7 +392,7 @@ const resolvers = {
       }
     },
 
-    // Resolver for fetching all users 
+    // Resolver for fetching all users
     allUsers: async (parent, args, context) => {
       try {
         if (!context.user) {
@@ -744,7 +744,7 @@ const resolvers = {
     },
 
     // Delete the user's cart
-    deleteCart: async (parent, agrs, context) => {
+    resetCart: async (parent, agrs, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
