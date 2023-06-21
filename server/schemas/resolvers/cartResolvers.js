@@ -248,9 +248,6 @@ const cartResolvers = {
           );
         }
 
-        // Since a user should always have a cart, when a user deletes their cart (easier implementation to
-        // deselect all items in the cart), we create a new cart
-
         // Create a new cart with initial values
         const newCart = await Cart.create({
           user: context.user._id,
