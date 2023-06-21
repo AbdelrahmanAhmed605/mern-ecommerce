@@ -117,6 +117,7 @@ const typeDefs = gql`
     developerOrder(orderId: ID!): Order
 
     reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
+    developerReview(reviewId: ID!): Review
   }
   type Mutation {
     login(usernameOrEmail: String!, password: String!): Auth
@@ -194,6 +195,7 @@ const typeDefs = gql`
 
     updateReview(id: ID!, rating: Float, comment: String): Review
     deleteReview(id: ID!): Review
+    developerDeleteReview(reviewId: ID!): Review
 
     adminDeleteUser(userId: ID!): User
   }

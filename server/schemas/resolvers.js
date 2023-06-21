@@ -85,6 +85,7 @@ const resolvers = {
           .populate("categories")
           .populate("user")
           .populate("reviews")
+          .sort({ updatedAt: -1 }) // Sort by descending order of updatedAt field
           .skip(skip)
           .limit(pageSize); // Retrieve only the specified number of products per page
         return products;
@@ -122,6 +123,7 @@ const resolvers = {
         const products = await Product.find({ user: userId })
           .populate("categories")
           .populate("user")
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(pageSize);
         return products;
@@ -142,6 +144,7 @@ const resolvers = {
         })
           .populate("categories")
           .populate("user")
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(pageSize);
         return products;
@@ -162,6 +165,7 @@ const resolvers = {
         })
           .populate("categories")
           .populate("user")
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(pageSize);
         return products;
@@ -185,6 +189,7 @@ const resolvers = {
         })
           .populate("categories")
           .populate("user")
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(pageSize);
 
@@ -288,6 +293,7 @@ const resolvers = {
 
         const skip = (page - 1) * pageSize;
         const orders = await Order.find({ user: context.user._id })
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(pageSize);
 
@@ -307,6 +313,7 @@ const resolvers = {
         const reviews = await Review.find({ user: userId })
           .populate("user")
           .populate("product")
+          .sort({ updatedAt: -1 })
           .skip(skip)
           .limit(pageSize);
         return reviews;
@@ -315,11 +322,53 @@ const resolvers = {
       }
     },
 
-    // Developer-only resolvers
+    // ---------- FOR DEVELOPER AND ADMIN USE -----------
 
-    // Resolver for fetching an order by ID (for developers only)
-    developerOrder: async (parent, { orderId }) => {
+    developerReview: async (parent, { reviewId }, context) => {
       try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        // Check if the user has admin or developer role
+        if (context.user.role === "user") {
+          throw new ForbiddenError("You are not authorized to update orders");
+        }
+
+        const review = await Review.findById(reviewId)
+          .populate("user")
+          .populate("product");
+
+        if (!review) {
+          throw new UserInputError("Review not found");
+        }
+
+        return review;
+      } catch (error) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch order");
+        }
+      }
+    },
+
+    // Resolver for fetching an order by ID
+    developerOrder: async (parent, { orderId }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        // Check if the user has admin or developer role
+        if (context.user.role === "user") {
+          throw new ForbiddenError(
+            "You are not authorized to view user's orders"
+          );
+        }
+
         const order = await Order.findById(orderId).populate({
           path: "products.productId",
           model: "Product",
@@ -331,7 +380,11 @@ const resolvers = {
 
         return order;
       } catch (error) {
-        if (error instanceof UserInputError) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
           throw error;
         } else {
           throw new Error("Failed to fetch order");
@@ -340,12 +393,27 @@ const resolvers = {
     },
 
     // Resolver for fetching all users (for developers only)
-    allUsers: async (parent, args) => {
+    allUsers: async (parent, args, context) => {
       try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+        // Check if the user has admin or developer role
+        if (context.user.role === "user") {
+          throw new ForbiddenError("You are not authorized to view users");
+        }
+
         const users = await User.find();
         return users;
       } catch (error) {
-        throw new Error("Failed to fetch users");
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch users");
+        }
       }
     },
   },
@@ -778,6 +846,15 @@ const resolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
 
+        // Check if the user has already reviewed the product
+        const existingReview = await Review.findOne({
+          product: args.productId,
+          user: context.user._id,
+        });
+        if (existingReview) {
+          throw new UserInputError("You have already reviewed this product.");
+        }
+
         // Create a review with the provided arguments and assign it to the authenticated user
         const review = await Review.create({
           ...args,
@@ -797,7 +874,10 @@ const resolvers = {
 
         return review;
       } catch (error) {
-        if (error instanceof AuthenticationError) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
           throw error;
         } else {
           throw new Error("Failed to create review");
@@ -1046,6 +1126,52 @@ const resolvers = {
     },
 
     // ---------- FOR DEVELOPER AND ADMIN USE ----------
+
+    // Allow developers and admins to delete user's reviews
+    developerDeleteReview: async (parent, { reviewId }, context) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        // Check if the user has admin or developer role
+        if (context.user.role === "user") {
+          throw new ForbiddenError("You are not authorized to update orders");
+        }
+
+        // Find and delete the review matching the provided ID
+        const review = await Review.findOneAndDelete({
+          _id: reviewId,
+        });
+        if (!review) {
+          throw new UserInputError(
+            "Review not found or you are not authorized to delete it"
+          );
+        }
+
+        // Add the review to the product's reviews array
+        const product = await Product.findByIdAndUpdate(
+          review.product,
+          { $pull: { reviews: review._id } },
+          { new: true }
+        );
+
+        // Update the product's average rating
+        await updateProductAverageRating(review.product);
+
+        return review;
+      } catch (error) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof ForbiddenError ||
+          error instanceof UserInputError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to delete review");
+        }
+      }
+    },
 
     // Update an order's existing information
     updateOrder: async (parent, args, context) => {
