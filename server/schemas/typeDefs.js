@@ -132,7 +132,6 @@ const typeDefs = gql`
       address: String!
       phone: String!
     ): Auth
-
     updateUser(
       username: String
       firstName: String
@@ -141,8 +140,8 @@ const typeDefs = gql`
       address: String
       phone: String
     ): User
-
     deleteUser: User
+    adminDeleteUser(userId: ID!): User
 
     createProduct(
       title: String!
@@ -152,7 +151,6 @@ const typeDefs = gql`
       image: String!
       categories: [ID!]!
     ): Product
-
     updateProduct(
       id: ID!
       title: String
@@ -162,7 +160,6 @@ const typeDefs = gql`
       image: String
       categories: [ID!]
     ): Product
-
     deleteProduct(id: ID!): Product
 
     createCategory(name: String!): Category
@@ -181,7 +178,6 @@ const typeDefs = gql`
       address: String!
       status: String!
     ): Order
-
     updateOrder(
       id: ID!
       products: [OrderProductInput!]
@@ -192,12 +188,9 @@ const typeDefs = gql`
     ): Order
 
     createReview(productId: ID!, rating: Float!, comment: String!): Review
-
     updateReview(id: ID!, rating: Float, comment: String): Review
     deleteReview(id: ID!): Review
     developerDeleteReview(reviewId: ID!): Review
-
-    adminDeleteUser(userId: ID!): User
   }
 
   input OrderProductInput {

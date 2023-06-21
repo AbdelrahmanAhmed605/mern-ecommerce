@@ -392,7 +392,7 @@ const resolvers = {
       }
     },
 
-    // Resolver for fetching all users (for developers only)
+    // Resolver for fetching all users 
     allUsers: async (parent, args, context) => {
       try {
         if (!context.user) {
