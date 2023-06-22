@@ -10,15 +10,16 @@ const orderSchema = new Schema(
     },
     products: [
       {
-        product: {
+        productId: {
           type: Schema.Types.ObjectId,
           ref: "Product",
           required: true,
         },
         // Stores the quantity of a particular product in the order (in case the user buys multiple quantities of the same product)
-        quantity: {
+        orderQuantity: {
           type: Number,
           default: 1,
+          required: true,
         },
       },
     ],

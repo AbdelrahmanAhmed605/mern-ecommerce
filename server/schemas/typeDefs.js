@@ -8,13 +8,15 @@ const typeDefs = gql`
 
   type User {
     _id: ID!
-    role: String! 
+    role: String!
     username: String!
     firstName: String!
     lastName: String!
     email: String!
     address: String!
     phone: String!
+    cart: Cart
+    products: [Product!]
     createdAt: String!
     updatedAt: String!
   }
@@ -25,7 +27,7 @@ const typeDefs = gql`
     averageRating: Float!
     description: String!
     price: Float!
-    quantity: Int!
+    stockQuantity: Int!
     image: String!
     categories: [Category!]!
     user: User
@@ -65,8 +67,8 @@ const typeDefs = gql`
   }
 
   type OrderProduct {
-    product: Product!
-    quantity: Int!
+    productId: Product!
+    orderQuantity: Int!
   }
 
   type Review {
@@ -115,6 +117,7 @@ const typeDefs = gql`
     developerOrder(orderId: ID!): Order
 
     reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
+    developerReview(reviewId: ID!): Review
   }
   type Mutation {
     login(usernameOrEmail: String!, password: String!): Auth
@@ -122,13 +125,13 @@ const typeDefs = gql`
     createUser(
       role: String!
       username: String!
+      password: String!
       firstName: String!
       lastName: String!
       email: String!
       address: String!
       phone: String!
     ): Auth
-
     updateUser(
       username: String
       firstName: String
@@ -137,39 +140,37 @@ const typeDefs = gql`
       address: String
       phone: String
     ): User
-
     deleteUser: User
+    adminDeleteUser(userId: ID!): User
 
     createProduct(
       title: String!
       description: String!
       price: Float!
-      quantity: Int!
+      stockQuantity: Int!
       image: String!
       categories: [ID!]!
     ): Product
-
     updateProduct(
       id: ID!
       title: String
       description: String
       price: Float
-      quantity: Int
+      stockQuantity: Int
       image: String
       categories: [ID!]
     ): Product
-
     deleteProduct(id: ID!): Product
 
     createCategory(name: String!): Category
     updateCategory(id: ID!, name: String): Category
     deleteCategory(id: ID!): Category
 
-    createCart(): Cart
-    addToCart(cartId: ID!, productId: ID!, quantity: Int!): Cart
-    removeFromCart(cartId: ID!, productId: ID!): Cart
-    updateCartProductQuantity(cartId: ID!, productId: ID!, quantity: Int!): Cart
-    deleteCart(id: ID!): Cart
+    createCart: Cart
+    addToCart(productId: ID!, quantity: Int!): Cart
+    removeFromCart(productId: ID!): Cart
+    updateCartProductQuantity(productId: ID!, quantity: Int!): Cart
+    resetCart: Cart
 
     createOrder(
       products: [OrderProductInput!]!
@@ -177,7 +178,6 @@ const typeDefs = gql`
       address: String!
       status: String!
     ): Order
-
     updateOrder(
       id: ID!
       products: [OrderProductInput!]
@@ -187,19 +187,15 @@ const typeDefs = gql`
       userId: ID!
     ): Order
 
-    createReview(
-      productId: ID!
-      rating: Float!
-      comment: String!
-    ): Review
-
+    createReview(productId: ID!, rating: Float!, comment: String!): Review
     updateReview(id: ID!, rating: Float, comment: String): Review
     deleteReview(id: ID!): Review
+    developerDeleteReview(reviewId: ID!): Review
   }
 
   input OrderProductInput {
     productId: ID!
-    quantity: Int!
+    orderQuantity: Int!
   }
 `;
 

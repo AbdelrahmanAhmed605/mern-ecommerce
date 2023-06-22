@@ -25,7 +25,7 @@ const productSchema = new Schema(
         message: "Price must be a non-negative value",
       },
     },
-    quantity: {
+    stockQuantity: {
       type: Number,
       default: 0,
       validate: {
