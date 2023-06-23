@@ -12,12 +12,12 @@ const productResolvers = {
       try {
         const skip = (page - 1) * pageSize; // Calculate the number of documents to skip based on the current page and page size
         const products = await Product.find()
+          .sort({ updatedAt: -1 }) // Sort by descending order of updatedAt field
+          .skip(skip) 
+          .limit(pageSize) // Retrieve only the specified number of products per page
           .populate("categories")
           .populate("user")
-          .populate("reviews")
-          .sort({ updatedAt: -1 }) // Sort by descending order of updatedAt field
-          .skip(skip)
-          .limit(pageSize); // Retrieve only the specified number of products per page
+          .populate("reviews");
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");
@@ -51,11 +51,11 @@ const productResolvers = {
       try {
         const skip = (page - 1) * pageSize;
         const products = await Product.find({ user: userId })
-          .populate("categories")
-          .populate("user")
           .sort({ updatedAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize)
+          .populate("categories")
+          .populate("user");
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");
@@ -72,11 +72,11 @@ const productResolvers = {
         const products = await Product.find({
           categories: { $in: categoryIds },
         })
-          .populate("categories")
-          .populate("user")
           .sort({ updatedAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize)
+          .populate("categories")
+          .populate("user");
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");
@@ -93,11 +93,11 @@ const productResolvers = {
         const products = await Product.find({
           price: { $gte: minPrice, $lte: maxPrice },
         })
-          .populate("categories")
-          .populate("user")
           .sort({ updatedAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize)
+          .populate("categories")
+          .populate("user");
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");
@@ -117,11 +117,11 @@ const productResolvers = {
         const products = await Product.find({
           averageRating: { $gte: minRating, $lte: maxRating },
         })
-          .populate("categories")
-          .populate("user")
           .sort({ updatedAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize)
+          .populate("categories")
+          .populate("user");
 
         return products;
       } catch (error) {

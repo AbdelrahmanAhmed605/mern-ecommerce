@@ -48,7 +48,11 @@ const orderResolvers = {
         const orders = await Order.find({ user: context.user._id })
           .sort({ updatedAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize) // Retrieve only the specified number of orders per page
+          .populate({
+            path: "products.productId",
+            model: "Product",
+          });
 
         return orders;
       } catch (error) {
