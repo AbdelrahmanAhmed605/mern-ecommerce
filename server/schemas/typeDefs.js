@@ -24,7 +24,7 @@ const typeDefs = gql`
   type Product {
     _id: ID!
     title: String!
-    averageRating: Float!
+    averageRating: Float
     description: String!
     price: Float!
     stockQuantity: Int!
