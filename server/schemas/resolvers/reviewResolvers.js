@@ -34,11 +34,11 @@ const reviewResolvers = {
       try {
         const skip = (page - 1) * pageSize;
         const reviews = await Review.find({ user: userId })
-          .populate("user")
-          .populate("product")
           .sort({ updatedAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize) // Retrieve only the specified number of reviews per page
+          .populate("user")
+          .populate("product");
         return reviews;
       } catch (error) {
         throw new Error("Failed to fetch reviews");
