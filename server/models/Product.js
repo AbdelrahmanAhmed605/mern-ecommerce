@@ -15,7 +15,7 @@ const productSchema = new Schema(
     },
     averageRating: {
       type: Number,
-      default: 0,
+      default: null,
     },
     price: {
       type: Number,
