@@ -46,7 +46,7 @@ const orderResolvers = {
 
         const skip = (page - 1) * pageSize;
         const orders = await Order.find({ user: context.user._id })
-          .sort({ updatedAt: -1 })
+          .sort({ createdAt: -1 })
           .skip(skip)
           .limit(pageSize) // Retrieve only the specified number of orders per page
           .populate({

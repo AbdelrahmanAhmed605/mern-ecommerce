@@ -88,24 +88,18 @@ const typeDefs = gql`
 
     products(page: Int, pageSize: Int): [Product!]!
     product(id: ID!): Product
-    productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
-    productsByCategory(
+    filteredProducts(
       categoryIds: [ID!]
+      minPrice: Float
+      maxPrice: Float
+      minRating: Float
+      maxRating: Float
+      sortOption: String
       page: Int
       pageSize: Int
     ): [Product!]!
-    productsByPriceRange(
-      minPrice: Float!
-      maxPrice: Float!
-      page: Int
-      pageSize: Int
-    ): [Product!]!
-    productsByReviewRating(
-      minRating: Float!
-      maxRating: Float!
-      page: Int
-      pageSize: Int
-    ): [Product!]!
+    searchProducts(searchTerm: String!): [Product!]!
+    productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
 
     categories: [Category!]!
     category(id: ID!): Category

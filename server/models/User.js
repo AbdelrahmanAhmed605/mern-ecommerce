@@ -21,6 +21,7 @@ const userSchema = new Schema(
         message:
           "Username can only contain letters, numbers, underscores, dashes, and periods",
       },
+      index: true,
     },
     firstName: {
       type: String,
@@ -38,6 +39,7 @@ const userSchema = new Schema(
         validator: (value) => validator.isEmail(value),
         message: "Must use a valid email address",
       },
+      index: true,
     },
     password: {
       type: String,
