@@ -34,7 +34,7 @@ const reviewResolvers = {
       try {
         const skip = (page - 1) * pageSize;
         const reviews = await Review.find({ user: userId })
-          .sort({ updatedAt: -1 })
+          .sort({ createdAt: -1 })
           .skip(skip)
           .limit(pageSize) // Retrieve only the specified number of reviews per page
           .populate("user")
