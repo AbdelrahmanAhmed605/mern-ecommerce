@@ -37,6 +37,9 @@ export const GET_PRODUCTS = gql`
       price
       image
       averageRating
+      reviews {
+        _id
+      }
     }
   }
 `;
@@ -67,6 +70,50 @@ export const GET_SINGLE_PRODUCT = gql`
   }
 `;
 
+export const GET_FILTERED_PRODUCTS = gql`
+  query FilteredProducts(
+    $categoryIds: [ID!]
+    $minPrice: Float
+    $maxPrice: Float
+    $minRating: Float
+    $maxRating: Float
+    $sortOption: String
+  ) {
+    filteredProducts(
+      categoryIds: $categoryIds
+      minPrice: $minPrice
+      maxPrice: $maxPrice
+      minRating: $minRating
+      maxRating: $maxRating
+      sortOption: $sortOption
+    ) {
+      _id
+      title
+      price
+      image
+      averageRating
+      reviews {
+        _id
+      }
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_SEARCH = gql`
+  query SearchProducts($searchTerm: String!) {
+    searchProducts(searchTerm: $searchTerm) {
+      _id
+      title
+      price
+      image
+      averageRating
+      reviews {
+        _id
+      }
+    }
+  }
+`;
+
 // Query to get products by user
 export const GET_PRODUCTS_BY_USER = gql`
   query ProductsByUser($userId: ID!) {
@@ -76,45 +123,9 @@ export const GET_PRODUCTS_BY_USER = gql`
       price
       image
       averageRating
-    }
-  }
-`;
-
-// Query to get products by category
-export const GET_PRODUCTS_BY_CATEGORY = gql`
-  query ProductsByCategory {
-    productsByCategory {
-      _id
-      title
-      price
-      image
-      averageRating
-    }
-  }
-`;
-
-// Query to get products by price range
-export const GET_PRODUCTS_BY_PRICE_RANGE = gql`
-  query ProductsByPriceRange($minPrice: Float!, $maxPrice: Float!) {
-    productsByPriceRange(minPrice: $minPrice, maxPrice: $maxPrice) {
-      _id
-      title
-      price
-      image
-      averageRating
-    }
-  }
-`;
-
-// Query to get products by review rating
-export const GET_PRODUCTS_BY_REVIEW_RATING = gql`
-  query ProductsByReviewRating($minRating: Float!, $maxRating: Float!) {
-    productsByReviewRating(minRating: $minRating, maxRating: $maxRating) {
-      _id
-      title
-      price
-      image
-      averageRating
+      reviews {
+        _id
+      }
     }
   }
 `;
