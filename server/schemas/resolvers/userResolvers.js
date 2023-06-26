@@ -115,6 +115,24 @@ const userResolvers = {
         // Give the user a "user" role unless provided otherwise
         const role = args.role || "user";
 
+        // Check if the username already exists
+        const existingUsername = await User.findOne({
+          username: args.username,
+        });
+        if (existingUsername) {
+          throw new UserInputError("Username already in use", {
+            invalidArgs: { username: args.username },
+          });
+        }
+
+        // Check if the email already exists
+        const existingEmail = await User.findOne({ email: args.email });
+        if (existingEmail) {
+          throw new UserInputError("Email already in use", {
+            invalidArgs: { email: args.email },
+          });
+        }
+
         // Create a new user in the database
         const user = await User.create({ ...args, role });
 
@@ -123,34 +141,18 @@ const userResolvers = {
         // Returning the token and the user
         return { token, user };
       } catch (error) {
-        if (error.name === "MongoError" && error.code === 11000) {
-          // Handling duplicate key errors for username, email, or other unique fields
-          const uniqueFieldErrors = Object.keys(error.keyPattern).map(
-            (field) => {
-              const errorMessage = userSchema.path(field).options.uniqueError;
-              return new UserInputError(errorMessage, {
-                invalidArgs: { [field]: args[field] },
-              });
-            }
-          );
-
-          // Throwing the unique field errors individually
-          if (uniqueFieldErrors.length > 0) {
-            throw uniqueFieldErrors[0];
-          } else {
-            // Throwing a general duplicate field value error
-            throw new UserInputError("Duplicate field value", {
-              invalidArgs: args,
-            });
-          }
+        if (error instanceof UserInputError) {
+          throw error;
         } else if (error.name === "ValidationError") {
           // Handling validation errors
           const errorMessages = Object.values(error.errors).map(
             (validationError) => validationError.message
           );
 
-          // Throwing a validation error with the custom message provided in the User model schema
-          throw new UserInputError("Validation error", {
+          // Throwing a validation error with the custom error messages
+          const errorMessage =
+            errorMessages.length > 0 ? errorMessages : "Validation error";
+          throw new UserInputError(errorMessage, {
             invalidArgs: args,
             validationErrors: errorMessages,
           });
@@ -168,6 +170,24 @@ const userResolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
 
+        // Ensure user does not change username to an already existing one
+        const existingUsername = await User.findOne({
+          username: args.username,
+        });
+        if (existingUsername) {
+          throw new UserInputError("Username already in use", {
+            invalidArgs: { username: args.username },
+          });
+        }
+
+        // Check if the email already exists
+        const existingEmail = await User.findOne({ email: args.email });
+        if (existingEmail) {
+          throw new UserInputError("Email already in use", {
+            invalidArgs: { email: args.email },
+          });
+        }
+
         const user = await User.findByIdAndUpdate(context.user._id, args, {
           new: true,
         });
@@ -178,45 +198,24 @@ const userResolvers = {
 
         return user;
       } catch (error) {
-        if (error.name === "MongoError" && error.code === 11000) {
-          // Handling duplicate key errors for username, email, or other unique fields
-          const uniqueFieldErrors = Object.keys(error.keyPattern).map(
-            (field) => {
-              const errorMessage = userSchema.path(field).options.uniqueError;
-              return new UserInputError(errorMessage, {
-                invalidArgs: { [field]: args[field] },
-              });
-            }
-          );
-
-          // Throwing the unique field errors individually
-          if (uniqueFieldErrors.length > 0) {
-            throw uniqueFieldErrors[0];
-          } else {
-            // Throwing a general duplicate field value error
-            throw new UserInputError("Duplicate field value", {
-              invalidArgs: args,
-            });
-          }
+        if (error instanceof UserInputError) {
+          throw error;
         } else if (error.name === "ValidationError") {
           // Handling validation errors
           const errorMessages = Object.values(error.errors).map(
             (validationError) => validationError.message
           );
 
-          // Throwing a validation error with the custom message provided in the User model schema
-          throw new UserInputError("Validation error", {
+          // Throwing a validation error with the custom error messages
+          const errorMessage =
+            errorMessages.length > 0 ? errorMessages[0] : "Validation error";
+          throw new UserInputError(errorMessage, {
             invalidArgs: args,
             validationErrors: errorMessages,
           });
-        } else if (
-          error instanceof AuthenticationError ||
-          error instanceof UserInputError
-        ) {
-          throw error;
         } else {
-          // Throwing a generic error message when failed to update a user
-          throw new Error("Failed to update user");
+          // Throwing a generic error message when failed to create a user
+          throw new Error("Failed to create user");
         }
       }
     },
