@@ -32,6 +32,12 @@ const cartResolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
 
+        // Check if the user already has a cart
+        const user = await User.findById(context.user._id);
+        if (user.cart) {
+          throw new UserInputError("User already has a cart");
+        }
+
         // Create a new cart with initial values
         const cart = await Cart.create({
           user: context.user._id,
@@ -45,7 +51,10 @@ const cartResolvers = {
         // Return the created cart
         return cart;
       } catch (error) {
-        if (error instanceof AuthenticationError) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError
+        ) {
           throw error;
         }
         throw new Error("Failed to create cart");

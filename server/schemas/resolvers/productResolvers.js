@@ -63,9 +63,8 @@ const productResolvers = {
           maxRating,
           sortOption,
           page = 1,
-          pageSize = 5,
+          pageSize = 10,
         } = args;
-        console.log("page, pagesize", page, pageSize);
 
         const skip = (page - 1) * pageSize; // Calculate skip value for pagination
 
@@ -103,9 +102,6 @@ const productResolvers = {
           // Filter by maximum rating if only maxRating is provided
           filter.averageRating = { $lte: maxRating };
         }
-
-        console.log(filter);
-        console.log(sortOption);
 
         let sortCriteria = { createdAt: -1 }; // Default sorting by createdAt
 

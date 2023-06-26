@@ -10,11 +10,7 @@ const typeDefs = gql`
     _id: ID!
     role: String!
     username: String!
-    firstName: String!
-    lastName: String!
     email: String!
-    address: String!
-    phone: String!
     cart: Cart
     products: [Product!]
     createdAt: String!
@@ -120,19 +116,11 @@ const typeDefs = gql`
       role: String!
       username: String!
       password: String!
-      firstName: String!
-      lastName: String!
       email: String!
-      address: String!
-      phone: String!
     ): Auth
     updateUser(
       username: String
-      firstName: String
-      lastName: String
       email: String
-      address: String
-      phone: String
     ): User
     deleteUser: User
     adminDeleteUser(userId: ID!): User
