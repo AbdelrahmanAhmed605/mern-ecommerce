@@ -22,21 +22,13 @@ export const CREATE_USER = gql`
   mutation createUser(
     $role: String!
     $username: String!
-    $firstName: String!
-    $lastName: String!
     $email: String!
-    $address: String!
-    $phone: String!
     $password: String!
   ) {
     createUser(
       role: $role
       username: $username
-      firstName: $firstName
-      lastName: $lastName
       email: $email
-      address: $address
-      phone: $phone
       password: $password
     ) {
       token
@@ -51,22 +43,8 @@ export const CREATE_USER = gql`
 
 // Mutation for updating a user
 export const UPDATE_USER = gql`
-  mutation UpdateUser(
-    $username: String
-    $firstName: String
-    $lastName: String
-    $email: String
-    $address: String
-    $phone: String
-  ) {
-    updateUser(
-      username: $username
-      firstName: $firstName
-      lastName: $lastName
-      email: $email
-      address: $address
-      phone: $phone
-    ) {
+  mutation UpdateUser($username: String, $email: String) {
+    updateUser(username: $username, email: $email) {
       _id
       email
       username
@@ -74,7 +52,7 @@ export const UPDATE_USER = gql`
   }
 `;
 
-// Mutation for deleting a user 
+// Mutation for deleting a user
 export const DELETE_USER = gql`
   mutation DeleteUser {
     deleteUser {
