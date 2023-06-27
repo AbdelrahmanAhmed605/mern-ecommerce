@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
-import { GET_FILTERED_PRODUCTS, GET_CATEGORIES } from "../utils/queries";
+import {
+  GET_FILTERED_PRODUCTS,
+  GET_CATEGORIES,
+  GET_ME,
+} from "../utils/queries";
 import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import UserForm from "../components/UserForm";
@@ -17,6 +21,7 @@ import {
   Checkbox,
   InputNumber,
   Modal,
+  message,
 } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 const { Title } = Typography;
@@ -32,6 +37,7 @@ const Home = () => {
   const [categoryMenuVisible, setCategoryMenuVisible] = useState(false); // Controls category dropdown element visibility
   const [priceMenuVisible, setPriceMenuVisible] = useState(false); // Controls price dropdown element visibility
   const [ratingMenuVisible, setRatingMenuVisible] = useState(false); // Controls rating dropdown element visibility
+  const [isUserFormVisible, setIsUserFormVisible] = useState(false); // Controls login/sign up form visibility
 
   // Query for fetching all categories id's and name
   const {
@@ -69,7 +75,9 @@ const Home = () => {
     fetchProductsByFilter,
   ]);
 
-  const handleAddToCart = async (event) => {};
+  const handleAddToCart = async (productId) => {
+    setIsUserFormVisible(true); // Display the user form or login/signup modal
+  };
 
   // ---------- Event handlers for filter options ----------
 
@@ -323,7 +331,7 @@ const Home = () => {
                 type="primary"
                 shape="round"
                 size="small"
-                onClick={handleAddToCart}
+                onClick={() => handleAddToCart(product._id)}
                 style={{ width: "100%" }}
               >
                 Add to Cart
@@ -332,6 +340,14 @@ const Home = () => {
           </Col>
         ))}
       </Row>
+      <Modal
+        title="Login"
+        visible={isUserFormVisible}
+        onCancel={() => setIsUserFormVisible(false)}
+        footer={null}
+      >
+        <UserForm />
+      </Modal>
     </div>
   );
 };

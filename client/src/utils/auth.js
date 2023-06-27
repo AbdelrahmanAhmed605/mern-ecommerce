@@ -14,7 +14,6 @@ class AuthService {
   // Perform login by storing the token in localStorage and redirecting to the home page
   login(idToken) {
     localStorage.setItem("id_token", idToken);
-    window.location.assign("/");
   }
 
   // Check if the user is logged in
