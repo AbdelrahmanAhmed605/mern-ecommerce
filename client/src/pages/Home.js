@@ -53,6 +53,22 @@ const Home = () => {
     { loading: filteredProdLoad, data: filteredProdData },
   ] = useLazyQuery(GET_FILTERED_PRODUCTS);
 
+  // Lazy Query for fetching the currently logged in user
+  const [
+    fetchCurrentUser,
+    { loading: currentUserLoading, data: currentUserData },
+  ] = useLazyQuery(GET_ME);
+
+  // mutation to create a shopping cart
+  const [createCart, { loading: cartLoading, error: cartError }] =
+    useMutation(CREATE_CART);
+
+  // mutation to add a product into the shopping cart
+  const [
+    addProdToCart,
+    { loading: addProdToCartLoad, error: addProdToCartError },
+  ] = useMutation(ADD_PROD_TO_CART);
+
   // Fetch filtered products when user selected filter options change
   useEffect(() => {
     fetchProductsByFilter({
@@ -75,8 +91,49 @@ const Home = () => {
     fetchProductsByFilter,
   ]);
 
+  // Adds a product to the user's shopping cart. Handles user authentication, cart creation, and product addition.
+  // Displays appropriate messages for success and failure.
   const handleAddToCart = async (productId) => {
-    setIsUserFormVisible(true); // Display the user form or login/signup modal
+    // Check if the user is currently logged in
+    if (!AuthService.loggedIn()) {
+      setIsUserFormVisible(true); // Display the user form or login/signup modal if user is not logged in
+
+      // Repeatedly check if the user is logged in and only continue with the function once the login is successful
+      await new Promise((resolve) => {
+        const checkUserInterval = setInterval(() => {
+          if (AuthService.loggedIn()) {
+            clearInterval(checkUserInterval); // Stop checking the login status
+            setIsUserFormVisible(false); // Hide the user form or login/signup modal
+            resolve(); // Fulfill the promise and resume execution
+          }
+        }, 500); // Check every 500 milliseconds if the user is logged in
+      });
+    }
+
+    try {
+      const { data } = await fetchCurrentUser(); // Fetch the current user after successful login
+      const userData = data;
+
+      // If user doesn't have a cart, create one
+      if (!userData.me.cart) {
+        await createCart();
+      }
+
+      // Add the product to the cart
+      await addProdToCart({
+        variables: {
+          productId: productId,
+          quantity: 1,
+        },
+      });
+
+      // Success message or further action
+      message.success("Product added to cart");
+    } catch (error) {
+      // Error message if an issue occurred during the process
+      console.error(error);
+      message.error("Failed to add product to cart");
+    }
   };
 
   // ---------- Event handlers for filter options ----------
