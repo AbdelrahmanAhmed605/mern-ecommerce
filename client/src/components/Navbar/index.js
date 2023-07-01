@@ -168,9 +168,9 @@ const Navbar = () => {
       }}
     >
       <div>
-        {/* Link to the "Shop All" page */}
+        {/* Link to the home page */}
         <Link
-          to="/allProducts"
+          to="/"
           style={{
             color: "inherit",
             textDecoration: "none",
@@ -178,7 +178,7 @@ const Navbar = () => {
             marginRight: "20px",
           }}
         >
-          Shop All
+          Shop
         </Link>
 
         {/* Dropdown menu for categories */}
@@ -188,21 +188,12 @@ const Navbar = () => {
             style={{
               color: "inherit",
               textDecoration: "none",
-              marginRight: "20px",
               fontSize: "18px",
             }}
           >
             Categories <DownOutlined />
           </Link>
         </Dropdown>
-
-        {/* Link to the "What's New" page */}
-        <Link
-          to="/"
-          style={{ color: "inherit", textDecoration: "none", fontSize: "18px" }}
-        >
-          What's New
-        </Link>
       </div>
 
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -261,7 +252,7 @@ const Navbar = () => {
                     // Render each product in the cart
                     cart.products.map((item) => (
                       <div
-                        key={item.product.id}
+                        key={item.product._id}
                         style={{
                           display: "flex",
                           marginBottom: "16px",
