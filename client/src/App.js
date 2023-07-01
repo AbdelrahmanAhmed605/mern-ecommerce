@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import SingleProduct from "./pages/SingleProduct";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -30,7 +31,6 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-
 function App() {
   return (
     <ApolloProvider client={client}>
@@ -40,6 +40,7 @@ function App() {
           <div className="content">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/product/:productId" element={<SingleProduct />} />
             </Routes>
           </div>
         </div>

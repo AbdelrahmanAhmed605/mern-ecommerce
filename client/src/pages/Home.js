@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
+import { Link } from "react-router-dom";
 import {
   GET_FILTERED_PRODUCTS,
   GET_CATEGORIES,
@@ -322,7 +323,7 @@ const Home = () => {
               visible={ratingMenuVisible}
               onVisibleChange={handleRatingMenuVisibleChange}
             >
-              <Button>
+              <Button style={{ marginRight: "15px" }}>
                 <Space>
                   Rating
                   <DownOutlined />
@@ -331,7 +332,7 @@ const Home = () => {
             </Dropdown>
           </div>
           <Dropdown overlay={sortMenu} trigger={["click"]}>
-            <Button>
+            <Button style={{ marginBottom: "16px" }}>
               <Space>
                 Sort By
                 <DownOutlined />
@@ -343,7 +344,7 @@ const Home = () => {
 
       <Row gutter={[16, 16]} justify="center">
         {displayedProducts.map((product) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
+          <Col xs={24} sm={12} md={8} lg={6} key={product._id}>
             <div
               style={{
                 borderRadius: "8px",
@@ -352,43 +353,56 @@ const Home = () => {
                 textAlign: "center",
               }}
             >
-              <img
-                src={product.image}
-                alt={product.title}
+              <Link
+                to={`/product/${product._id}`}
                 style={{
-                  width: "100%",
-                  borderRadius: "8px",
-                  marginBottom: "16px",
-                }}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
+                  color: "inherit",
                 }}
               >
-                <h3 style={{ marginBottom: "4px", fontWeight: "bold" }}>
-                  {product.title}
-                </h3>
-                <p style={{ marginBottom: "4px", fontWeight: "bold" }}>
-                  ${product.price}
-                </p>
-              </div>
-              <div style={{ marginBottom: "4px" }}>
-                <Rate
-                  allowHalf
-                  disabled
-                  defaultValue={product.averageRating || 0}
-                  style={{ color: "#ffd700", marginRight: "8px" }}
-                />
-                <span>({product.reviews.length})</span>
-              </div>
+                <div
+                  style={{
+                    cursor: "pointer",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    style={{
+                      width: "100%",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <h3 style={{ marginBottom: "4px", fontWeight: "bold" }}>
+                      {product.title}
+                    </h3>
+                    <p style={{ marginBottom: "4px", fontWeight: "bold" }}>
+                      ${product.price}
+                    </p>
+                  </div>
+                  <div style={{ marginBottom: "4px" }}>
+                    <Rate
+                      allowHalf
+                      disabled
+                      defaultValue={product.averageRating || 0}
+                      style={{ color: "#ffd700", marginRight: "8px" }}
+                    />
+                    <span>({product.reviews.length})</span>
+                  </div>
+                </div>
+              </Link>
               <Button
                 type="primary"
                 shape="round"
                 size="small"
-                onClick={() => handleAddToCart(product._id)}
+                onClick={handleAddToCart}
                 style={{ width: "100%" }}
               >
                 Add to Cart
