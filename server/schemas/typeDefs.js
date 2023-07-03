@@ -73,7 +73,7 @@ const typeDefs = gql`
     street: String!
     city: String!
     state: String!
-    zipCode: String!
+    postalCode: String!
   }
 
   type Review {
@@ -168,7 +168,7 @@ const typeDefs = gql`
       address: OrderAddressInput!
       status: String!
     ): Order
-    devUpdateOrder(
+    updateOrder(
       id: ID!
       name: String
       email: String
@@ -192,7 +192,7 @@ const typeDefs = gql`
     street: String!
     city: String!
     state: String!
-    zipCode: String!
+    postalCode: String!
   }
 `;
 

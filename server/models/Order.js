@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const validator = require("validator");
 
 const orderSchema = new Schema(
   {
@@ -23,9 +24,15 @@ const orderSchema = new Schema(
         type: String,
         required: true,
       },
-      zipCode: {
+      postalCode: {
         type: String,
         required: true,
+        validate: {
+          validator: function (value) {
+            return /^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$/.test(value);
+          },
+          message: "Invalid postal code format",
+        },
       },
     },
     user: {
@@ -52,6 +59,7 @@ const orderSchema = new Schema(
     totalAmount: {
       type: Number,
       required: true,
+      min: 0,
     },
     status: {
       type: String,
