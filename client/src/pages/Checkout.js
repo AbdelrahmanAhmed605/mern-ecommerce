@@ -22,7 +22,11 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { GET_CART } from "../utils/queries";
-import { CREATE_ORDER, REMOVE_PROD_FROM_CART } from "../utils/mutations";
+import {
+  CREATE_ORDER,
+  REMOVE_PROD_FROM_CART,
+  RESET_CART,
+} from "../utils/mutations";
 import AuthService from "../utils/auth";
 
 const { Panel } = Collapse;
@@ -68,6 +72,10 @@ const Checkout = () => {
     removeProduct,
     { loading: removeProductLoading, error: removeProductError },
   ] = useMutation(REMOVE_PROD_FROM_CART);
+
+  // mutation to reset the user's shopping cart and remove all products after they have completed their purchase
+  const [resetCart, { loading: resetCartLoading, error: resetCartError }] =
+    useMutation(RESET_CART);
 
   // Calculate delivery cost based on order value
   const deliveryCost = cart.totalPrice > 100 ? 0 : 10;
@@ -190,6 +198,8 @@ const Checkout = () => {
         message.error("Payment failed");
       } else {
         message.success("Order Complete");
+        // Once the Order is created and payment successful, we can reset the user's cart and remove all the products inside
+        await resetCart({ refetchQueries: [{ query: GET_CART }] });
         // Redirect the user to a confirmation page
         navigate(`/confirmation/${orderId}`);
       }
@@ -414,6 +424,12 @@ const Checkout = () => {
             key="3"
             disabled={!shippingInfoCompleted}
           >
+            {loading && (
+              <div style={{ textAlign: "center", marginTop: "20px" }}>
+                <Spin spinning={true} size="large" />
+                <p>Processing payment...</p>
+              </div>
+            )}
             <Form form={form} onFinish={handleCardPayment}>
               <Row gutter={24}>
                 <Col span={24}>

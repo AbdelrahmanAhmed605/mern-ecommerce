@@ -19,6 +19,7 @@ import {
 
 import { GET_ORDER } from "../utils/queries";
 import formatDateTime from "../utils/helper";
+import AuthService from "../utils/auth";
 
 const { Title, Text } = Typography;
 
@@ -36,6 +37,16 @@ const Confirmation = () => {
       orderId: orderId, // Pass the orderId as a variable to the query
     },
   });
+
+  // Check if the user is accessing the page while logged out and display a message to inform them they must be logged in
+  if (!AuthService.loggedIn()) {
+    return (
+      <div style={{ textAlign: "center", fontSize: "18px", marginTop: "20px" }}>
+        <Spin spinning={true} size="large" />
+        <p>Please log in to view the checkout</p>
+      </div>
+    );
+  }
 
   // If the order is still loading, display a loading spinner
   if (orderLoading) {
