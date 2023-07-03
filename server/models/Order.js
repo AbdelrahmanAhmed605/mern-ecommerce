@@ -2,11 +2,37 @@ const { Schema, model } = require("mongoose");
 
 const orderSchema = new Schema(
   {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    address: {
+      street: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      state: {
+        type: String,
+        required: true,
+      },
+      zipCode: {
+        type: String,
+        required: true,
+      },
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true, // Added index to improve query performance when searching for orders by a particular user
+      index: true,
     },
     products: [
       {
@@ -27,10 +53,6 @@ const orderSchema = new Schema(
       type: Number,
       required: true,
     },
-    address: {
-      type: String,
-      required: true,
-    },
     status: {
       type: String,
       enum: ["pending", "shipped", "delivered", "canceled"], // Status can only have the values "pending", "shipped", "delivered", or "canceled"
@@ -41,6 +63,11 @@ const orderSchema = new Schema(
     timestamps: true,
   }
 );
+
+orderSchema.pre("save", function (next) {
+  this.name = this.name.toLowerCase(); // Convert the name to lowercase
+  next();
+});
 
 const Order = model("Order", orderSchema);
 module.exports = Order;
