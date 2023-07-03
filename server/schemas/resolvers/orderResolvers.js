@@ -54,7 +54,11 @@ const orderResolvers = {
             model: "Product",
           });
 
-        return orders;
+        const totalOrders = await Order.countDocuments({
+          user: context.user._id,
+        });
+
+        return { orders, totalOrders };
       } catch (error) {
         if (error instanceof AuthenticationError) {
           throw error;

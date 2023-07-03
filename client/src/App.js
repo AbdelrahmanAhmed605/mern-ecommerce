@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import SingleProduct from "./pages/SingleProduct";
 import Checkout from "./pages/Checkout";
 import Confirmation from "./pages/Confirmation";
+import Orders from "./pages/Orders";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -45,6 +46,7 @@ function App() {
               <Route path="/product/:productId" element={<SingleProduct />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/confirmation/:orderId" element={<Confirmation />} />
+              <Route path="/user/orders" element={<Orders />} />
             </Routes>
           </div>
         </div>

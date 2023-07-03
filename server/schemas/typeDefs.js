@@ -76,6 +76,11 @@ const typeDefs = gql`
     postalCode: String!
   }
 
+  type OrderPagination {
+    orders: [Order!]!
+    totalOrders: Int!
+  }
+
   type Review {
     _id: ID!
     user: User!
@@ -112,7 +117,7 @@ const typeDefs = gql`
     cart: Cart
 
     order(id: ID!): Order
-    ordersByUser(page: Int, pageSize: Int): [Order!]!
+    ordersByUser(page: Int, pageSize: Int): OrderPagination!
     developerOrder(orderId: ID!): Order
 
     reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
