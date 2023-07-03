@@ -55,8 +55,10 @@ const typeDefs = gql`
     _id: ID!
     user: User!
     products: [OrderProduct!]!
+    name: String!
+    email: String!
     totalAmount: Float!
-    address: String!
+    address: OrderAddress!
     status: String!
     createdAt: String!
     updatedAt: String!
@@ -65,6 +67,13 @@ const typeDefs = gql`
   type OrderProduct {
     productId: Product!
     orderQuantity: Int!
+  }
+
+  type OrderAddress {
+    street: String!
+    city: String!
+    state: String!
+    postalCode: String!
   }
 
   type Review {
@@ -118,10 +127,7 @@ const typeDefs = gql`
       password: String!
       email: String!
     ): Auth
-    updateUser(
-      username: String
-      email: String
-    ): User
+    updateUser(username: String, email: String): User
     deleteUser: User
     adminDeleteUser(userId: ID!): User
 
@@ -155,18 +161,21 @@ const typeDefs = gql`
     resetCart: Cart
 
     createOrder(
+      name: String!
+      email: String!
       products: [OrderProductInput!]!
       totalAmount: Float!
-      address: String!
+      address: OrderAddressInput!
       status: String!
     ): Order
     updateOrder(
       id: ID!
+      name: String
+      email: String
       products: [OrderProductInput!]
       totalAmount: Float
-      address: String
+      address: OrderAddressInput
       status: String
-      userId: ID!
     ): Order
 
     createReview(productId: ID!, rating: Float!, comment: String!): Review
@@ -178,6 +187,12 @@ const typeDefs = gql`
   input OrderProductInput {
     productId: ID!
     orderQuantity: Int!
+  }
+  input OrderAddressInput {
+    street: String!
+    city: String!
+    state: String!
+    postalCode: String!
   }
 `;
 

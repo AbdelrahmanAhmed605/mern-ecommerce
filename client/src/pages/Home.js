@@ -402,7 +402,7 @@ const Home = () => {
                 type="primary"
                 shape="round"
                 size="small"
-                onClick={handleAddToCart}
+                onClick={() => handleAddToCart(product._id)}
                 style={{ width: "100%" }}
               >
                 Add to Cart

@@ -133,22 +133,21 @@ export const RESET_CART = gql`
 
 // Mutation for creating a new order
 export const CREATE_ORDER = gql`
-  input OrderProductInput {
-    productId: ID!
-    orderQuantity: Int!
-  }
-
   mutation CreateOrder(
     $products: [OrderProductInput!]!
     $totalAmount: Float!
-    $address: String!
+    $address: OrderAddressInput!
     $status: String!
+    $name: String!
+    $email: String!
   ) {
     createOrder(
       products: $products
       totalAmount: $totalAmount
       address: $address
       status: $status
+      name: $name
+      email: $email
     ) {
       _id
       products {

@@ -260,15 +260,17 @@ const Navbar = () => {
                         }}
                       >
                         {/* Product image */}
-                        <img
-                          src={item.product.image}
-                          alt={item.product.title}
-                          style={{
-                            width: "80px",
-                            marginRight: "16px",
-                            objectFit: "contain",
-                          }}
-                        />
+                        <Link to={`/product/${item.product._id}`}>
+                          <img
+                            src={item.product.image}
+                            alt={item.product.title}
+                            style={{
+                              width: "80px",
+                              marginRight: "16px",
+                              objectFit: "contain",
+                            }}
+                          />
+                        </Link>
                         <div>
                           {/* Product title */}
                           <p
@@ -335,9 +337,21 @@ const Navbar = () => {
                 )}
                 {/* Buttons to take user to checkout page or view their shopping cart in a different page */}
                 <div style={{ marginTop: "16px" }}>
-                  <Button type="primary" style={{ marginBottom: "8px" }}>
-                    Checkout
-                  </Button>
+                  {cart && cart.products && cart.products.length > 0 ? (
+                    <Link to={"/checkout"}>
+                      <Button type="primary" style={{ marginBottom: "8px" }}>
+                        Checkout
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      type="primary"
+                      style={{ marginBottom: "8px" }}
+                      disabled
+                    >
+                      Checkout
+                    </Button>
+                  )}
                   <Button style={{ backgroundColor: "#fff" }}>
                     Shopping Bag
                   </Button>

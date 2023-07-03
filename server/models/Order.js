@@ -1,12 +1,45 @@
 const { Schema, model } = require("mongoose");
+const validator = require("validator");
 
 const orderSchema = new Schema(
   {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    address: {
+      street: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      state: {
+        type: String,
+        required: true,
+      },
+      postalCode: {
+        type: String,
+        required: true,
+        validate: {
+          validator: function (value) {
+            return /^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$/.test(value);
+          },
+          message: "Invalid postal code format",
+        },
+      },
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true, // Added index to improve query performance when searching for orders by a particular user
+      index: true,
     },
     products: [
       {
@@ -26,10 +59,7 @@ const orderSchema = new Schema(
     totalAmount: {
       type: Number,
       required: true,
-    },
-    address: {
-      type: String,
-      required: true,
+      min: 0,
     },
     status: {
       type: String,
@@ -41,6 +71,11 @@ const orderSchema = new Schema(
     timestamps: true,
   }
 );
+
+orderSchema.pre("save", function (next) {
+  this.name = this.name.toLowerCase(); // Convert the name to lowercase
+  next();
+});
 
 const Order = model("Order", orderSchema);
 module.exports = Order;

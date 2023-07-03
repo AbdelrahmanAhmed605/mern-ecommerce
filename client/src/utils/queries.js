@@ -195,7 +195,14 @@ export const GET_ORDER = gql`
   query Order($orderId: ID!) {
     order(id: $orderId) {
       _id
-      address
+      email
+      name
+      address {
+        street
+        state
+        city
+        postalCode
+      }
       products {
         productId {
           _id
