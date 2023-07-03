@@ -120,7 +120,7 @@ const Checkout = () => {
     }
   };
 
-  // Handle card payment when the user attempts to purchase their order
+  // Handle card payment and database order creation when the user attempts to purchase their order
   const handleCardPayment = async (values) => {
     setLoading(true);
     if (!AuthService.loggedIn()) {
