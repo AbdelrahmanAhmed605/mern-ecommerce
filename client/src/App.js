@@ -11,6 +11,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import SingleProduct from "./pages/SingleProduct";
+import Checkout from "./pages/Checkout";
+import Confirmation from "./pages/Confirmation";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -41,6 +43,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/product/:productId" element={<SingleProduct />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/confirmation/:orderId" element={<Confirmation />} />
             </Routes>
           </div>
         </div>

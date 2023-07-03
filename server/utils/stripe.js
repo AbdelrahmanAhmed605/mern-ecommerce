@@ -6,12 +6,9 @@ const stripeInstance = stripe(process.env.STRIPE_SECRET_KEY);
 
 // Function to create a payment intent with the given amount and currency
 const createPaymentIntent = async (amount, currency) => {
-  console.log("\nPRIVATE TEST KEY:", process.env.STRIPE_SECRET_KEY);
   try {
     // Sanitize the amount by converting it to a positive integer in cents
     const sanitizedAmount = Math.abs(Number(amount) * 100);
-
-    console.log("Sanitized Amount:", sanitizedAmount);
 
     // Check if the amount is invalid (less than or equal to 0)
     if (amount <= 0) {
@@ -28,9 +25,6 @@ const createPaymentIntent = async (amount, currency) => {
       amount: sanitizedAmount,
       currency,
     });
-
-    console.log("paymentIntent:", paymentIntent);
-    console.log(JSON.stringify(paymentIntent, null, 4));
 
     return paymentIntent;
   } catch (error) {
