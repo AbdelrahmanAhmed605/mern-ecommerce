@@ -1,9 +1,13 @@
 require("dotenv").config(); // Load environment variables from .env file
-const express = require("express"); // Import the Express framework
-const { ApolloServer } = require("apollo-server-express"); // Import Apollo Server
 const path = require("path");
+
+const express = require("express"); // Import the Express framework
+const paymentRoutes = require("./utils/stripe"); // Import the payment routes
+
+const { ApolloServer } = require("apollo-server-express"); // Import Apollo Server
 const { authMiddleware } = require("./utils/auth");
 const { typeDefs, resolvers } = require("./schemas");
+
 const db = require("./config/connection"); // Import the database connection
 
 const app = express(); // Create an instance of the Express application
@@ -23,6 +27,9 @@ app.use(express.json()); // Middleware to parse JSON request bodies
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../client/build")));
 }
+
+// Mount the payment routes at "/api/payments"
+app.use("/api/payments", paymentRoutes);
 
 // Serve the index.html file for all other routes
 app.get("*", (req, res) => {
