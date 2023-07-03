@@ -102,14 +102,14 @@ const Orders = () => {
                         <Title level={4} style={{ marginBottom: "12px" }}>
                           {order.name}
                         </Title>
-                        <Text strong>Date: </Text>
-                        <Text>{formatDateTime(order.createdAt)}</Text>
+                        <Text strong>Order ID: </Text>
+                        <Text>{order._id}</Text> {/* Display the order ID */}
                         <Divider style={{ margin: "16px 0" }} />
-                        <Text strong>Delivery Address:</Text>
-                        <Text>
-                          {order.address.street}, {order.address.city},{" "}
-                          {order.address.state}, {order.address.postalCode}
-                        </Text>
+                        <Text strong>Date Ordered: </Text>
+                        <Text>{formatDateTime(order.createdAt)}</Text>
+                        <br />
+                        <Text strong>Last Updated: </Text>
+                        <Text>{formatDateTime(order.updatedAt)}</Text>
                         <Divider style={{ margin: "16px 0" }} />
                         <Text strong>Products:</Text>
                         {order.products.map((product) => (
@@ -130,17 +130,17 @@ const Orders = () => {
                               </Text>
                             </div>
                             <div>
-                              <Text strong>Quantity:</Text>
+                              <Text strong>Quantity: </Text>
                               <Text>{product.orderQuantity}</Text>
                             </div>
                             <div>
-                              <Text strong>Price:</Text>
+                              <Text strong>Price: </Text>
                               <Text>${product.productId.price}</Text>
                             </div>
                             <Divider style={{ margin: "8px 0" }} />
                           </div>
                         ))}
-                        <Text strong>Total Amount:</Text>
+                        <Text strong>Total Amount: </Text>
                         <Text>${order.totalAmount}</Text>
                       </div>
                       <div>
