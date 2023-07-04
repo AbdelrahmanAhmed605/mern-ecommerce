@@ -9,23 +9,23 @@ import {
 } from "../utils/mutations";
 import { GET_CART } from "../utils/queries";
 
+// Component for displaying the shopping cart
 const ShoppingCart = () => {
-  const [prodQuantity, setProdQuantity] = useState(1);
-  const [cartItems, setCartItems] = useState([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-
+  // Query for retrieving the cart data
   const {
     loading: cartLoading,
     error: cartError,
     data: cartData,
   } = useQuery(GET_CART);
-  const cart = cartData?.cart || [];
+  const cart = cartData?.cart || []; // Extracts the cart from the query data
 
+  // Mutation for removing a product from the cart
   const [
     removeProduct,
     { loading: removeProductLoading, error: removeProductError },
   ] = useMutation(REMOVE_PROD_FROM_CART);
 
+  // Mutation for updating the quantity of a product in the cart
   const [
     updateProductQuantity,
     {
@@ -34,23 +34,19 @@ const ShoppingCart = () => {
     },
   ] = useMutation(UPDATE_CART_PROD_QUANTITY);
 
+  // Handler for removing a product from the cart
   const handleRemoveProduct = (productId) => {
     removeProduct({ variables: { productId: productId } });
   };
 
-  useEffect(() => {
-    if (cartData && cartData.cart) {
-      setTotalPrice(cartData.cart.totalPrice);
-    }
-  }, [cartData]);
-
+  // Handler for changing the quantity of a product in the cart
   const handleQuantityChange = (value, productId) => {
-    setProdQuantity(value);
     updateProductQuantity({
       variables: { productId: productId, quantity: value },
     });
   };
 
+  // Table columns for displaying the items in the cart
   const columns = [
     {
       title: "Image",
@@ -133,6 +129,7 @@ const ShoppingCart = () => {
     },
   ];
 
+  // Conditional rendering based on the cart loading state
   if (cartLoading) return <p>Loading...</p>;
   if (cartError) return <p>Error: {cartError.message}</p>;
 
@@ -145,6 +142,7 @@ const ShoppingCart = () => {
         </div>
       )}
       {cart && (
+        // Create a table with the cart's data source and display the data as rendered in the "columns" variable
         <Table
           dataSource={cart.products.map((item) => ({
             ...item.product,
@@ -156,7 +154,11 @@ const ShoppingCart = () => {
         />
       )}
       <div style={{ marginTop: "20px" }}>
-        <h3>Total Cart Price: ${totalPrice}</h3>
+        {cart && cart.products ? (
+          <h3>Total Cart Price: ${cart.totalPrice}</h3>
+        ) : (
+          <h3>Total Cart Price: $0</h3>
+        )}
         <Space>
           {cart && cart.products && cart.products.length > 0 ? (
             <Link to={"/checkout"}>
