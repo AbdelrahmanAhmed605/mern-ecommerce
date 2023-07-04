@@ -237,7 +237,43 @@ const Checkout = () => {
 
   return (
     <Row gutter={24}>
-      <Col span={16}>
+      <Col xs={24} lg={{ span: 8, push: 16 }}>
+        <Card title="Order Summary">
+          <p>Order value: ${cart.totalPrice}</p>
+          <p>Delivery cost: ${deliveryCost}</p>
+          <p>Est Tax: ${(0.05 * cart.totalPrice).toFixed(2)}</p>
+          <p>Total Price: ${totalPrice.toFixed(2)}</p>
+        </Card>
+
+        <Alert
+          message="Important Information"
+          description={
+            <div style={{ marginTop: "24px" }}>
+              <p>
+                Please note that this is a sample website for demonstration
+                purposes and does not actually sell real products. It is
+                designed to accept only testing card details, so no actual
+                payments will be processed. To successfully test the payment
+                process, please use the following card details:
+              </p>
+              <ul>
+                <li>Card Name: Test Card</li>
+                <li>Card Number: 4242 4242 4242 4242</li>
+                <li>Expiry Date: 12/37</li>
+                <li>CVV: 111</li>
+                <li>postalCode Code: 11111</li>
+              </ul>
+              <p>
+                You can enter these card details when prompted during the
+                checkout process to simulate a successful payment.
+              </p>
+            </div>
+          }
+          type="info"
+          showIcon
+        />
+      </Col>
+      <Col xs={24} lg={{ span: 16, pull: 8 }}>
         <Collapse activeKey={collapseActiveKey}>
           <Panel header="Review Order" key="1">
             {cartLoading && (
@@ -481,43 +517,6 @@ const Checkout = () => {
             </Form>
           </Panel>
         </Collapse>
-      </Col>
-
-      <Col span={8}>
-        <Card title="Order Summary">
-          <p>Order value: ${cart.totalPrice}</p>
-          <p>Delivery cost: ${deliveryCost}</p>
-          <p>Est Tax: ${(0.05 * cart.totalPrice).toFixed(2)}</p>
-          <p>Total Price: ${totalPrice.toFixed(2)}</p>
-        </Card>
-
-        <Alert
-          message="Important Information"
-          description={
-            <div style={{ marginTop: "24px" }}>
-              <p>
-                Please note that this is a sample website for demonstration
-                purposes and does not actually sell real products. It is
-                designed to accept only testing card details, so no actual
-                payments will be processed. To successfully test the payment
-                process, please use the following card details:
-              </p>
-              <ul>
-                <li>Card Name: Test Card</li>
-                <li>Card Number: 4242 4242 4242 4242</li>
-                <li>Expiry Date: 12/37</li>
-                <li>CVV: 111</li>
-                <li>postalCode Code: 11111</li>
-              </ul>
-              <p>
-                You can enter these card details when prompted during the
-                checkout process to simulate a successful payment.
-              </p>
-            </div>
-          }
-          type="info"
-          showIcon
-        />
       </Col>
     </Row>
   );
