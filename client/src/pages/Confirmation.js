@@ -77,28 +77,28 @@ const Confirmation = () => {
       <Divider />
       <Row gutter={[16, 24]}>
         {/* Display Order ID */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Order ID:
           </Text>{" "}
           <Text>{order._id}</Text>
         </Col>
         {/* Display Name */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Name:
           </Text>{" "}
           <Text>{order.name}</Text>
         </Col>
         {/* Display Email */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Email:
           </Text>{" "}
           <Text>{order.email}</Text>
         </Col>
         {/* Display Shipping Address */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Shipping Address:
           </Text>
@@ -119,42 +119,46 @@ const Confirmation = () => {
           </div>
         </Col>
         {/* Display Order Details */}
-        <Col span={24}>
+        <Col xs={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Order Details:
           </Text>
-          {order.products.map((product) => (
-            <div key={product.productId._id} style={{ marginTop: "16px" }}>
-              <div style={{ fontSize: "16px", fontWeight: "bold" }}>
-                {product.productId.title}
-              </div>
-              <div>
-                <Avatar
-                  src={product.productId.image}
-                  alt={product.productId.title}
-                  size={80}
-                  style={{ marginTop: "8px" }}
-                />
-              </div>
-              <div style={{ marginTop: "8px" }}>
-                <Text>Quantity: {product.orderQuantity}</Text>
-              </div>
-              <div style={{ marginTop: "8px" }}>
-                <Text>Price: ${product.productId.price}</Text>
-              </div>
-              <Divider />
-            </div>
-          ))}
+          <Row gutter={[4, 4]} style={{ marginTop: "16px" }}>
+            {order.products.map((product) => (
+              <Col key={product.productId._id} xs={24} sm={12} md={8}>
+                <div>
+                  <div style={{ fontSize: "16px", fontWeight: "bold" }}>
+                    {product.productId.title}
+                  </div>
+                  <div>
+                    <Avatar
+                      src={product.productId.image}
+                      alt={product.productId.title}
+                      size={80}
+                      style={{ marginTop: "8px" }}
+                    />
+                  </div>
+                  <div style={{ marginTop: "8px" }}>
+                    <Text>Quantity: {product.orderQuantity}</Text>
+                  </div>
+                  <div style={{ marginTop: "8px" }}>
+                    <Text>Price: ${product.productId.price}</Text>
+                  </div>
+                  <Divider />
+                </div>
+              </Col>
+            ))}
+          </Row>
         </Col>
         {/* Display Total Amount */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Total Amount:
           </Text>{" "}
           <Text>${order.totalAmount}</Text>
         </Col>
         {/* Display Order Status */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Status:
           </Text>{" "}
@@ -163,7 +167,7 @@ const Confirmation = () => {
           </Text>
         </Col>
         {/* Display Order Placed Time */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Order Placed:
           </Text>{" "}
@@ -173,7 +177,7 @@ const Confirmation = () => {
           <Text>{formatDateTime(order.createdAt)}</Text>
         </Col>
         {/* Display Last Updated Time */}
-        <Col span={24}>
+        <Col xs={24} sm={12}>
           <Text strong style={{ fontSize: "18px" }}>
             Last Updated:
           </Text>{" "}
