@@ -169,23 +169,33 @@ export const GET_CART = gql`
 
 // Query to get the user's orders
 export const GET_ORDERS_BY_USER = gql`
-  query OrdersByUser {
-    ordersByUser {
-      _id
-      address
-      products {
-        productId {
-          _id
-          title
-          price
-          image
+  query OrdersByUser($page: Int, $pageSize: Int) {
+    ordersByUser(page: $page, pageSize: $pageSize) {
+      orders {
+        _id
+        address {
+          city
+          postalCode
+          state
+          street
         }
-        orderQuantity
+        createdAt
+        email
+        name
+        products {
+          orderQuantity
+          productId {
+            _id
+            title
+            price
+            image
+          }
+        }
+        status
+        totalAmount
+        updatedAt
       }
-      totalAmount
-      status
-      createdAt
-      updatedAt
+      totalOrders
     }
   }
 `;
