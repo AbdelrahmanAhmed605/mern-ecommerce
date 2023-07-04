@@ -352,9 +352,11 @@ const Navbar = () => {
                       Checkout
                     </Button>
                   )}
-                  <Button style={{ backgroundColor: "#fff" }}>
-                    Shopping Bag
-                  </Button>
+                  <Link to={"/user/cart"}>
+                    <Button style={{ backgroundColor: "#fff" }}>
+                      Shopping Bag
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ) : (
@@ -390,14 +392,22 @@ const Navbar = () => {
           trigger={["hover"]}
         >
           {/* Cart icon and number identifying how many products are in the cart */}
-          <div className="cart-icon">
-            <ShoppingCartOutlined
-              style={{ fontSize: "22px", cursor: "pointer" }}
-            />
-            {cart && cart.products && cart.products.length > 0 && (
-              <span>{cart.products.length}</span>
-            )}
-          </div>
+          <Link
+            to={`/user/cart`}
+            style={{
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            <div className="cart-icon">
+              <ShoppingCartOutlined
+                style={{ fontSize: "22px", cursor: "pointer" }}
+              />
+              {cart && cart.products && cart.products.length > 0 && (
+                <span>{cart.products.length}</span>
+              )}
+            </div>
+          </Link>
         </Dropdown>
 
         <Modal
