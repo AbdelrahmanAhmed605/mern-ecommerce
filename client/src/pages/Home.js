@@ -9,6 +9,7 @@ import {
 import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import UserForm from "../components/UserForm";
+import FilterOptions from "../components/HomeFilters";
 
 import {
   Row,
@@ -16,15 +17,10 @@ import {
   Typography,
   Button,
   Rate,
-  Space,
-  Dropdown,
-  Menu,
-  Checkbox,
-  InputNumber,
   Modal,
   message,
+  Pagination,
 } from "antd";
-import { DownOutlined } from "@ant-design/icons";
 const { Title } = Typography;
 
 const Home = () => {
@@ -35,10 +31,9 @@ const Home = () => {
   const [minRating, setMinRating] = useState(undefined); // Stores minimum rating value
   const [maxRating, setMaxRating] = useState(undefined); // Stores maximum rating value
   const [sortOption, setSortOption] = useState(undefined); // Stores selected sort option
-  const [categoryMenuVisible, setCategoryMenuVisible] = useState(false); // Controls category dropdown element visibility
-  const [priceMenuVisible, setPriceMenuVisible] = useState(false); // Controls price dropdown element visibility
-  const [ratingMenuVisible, setRatingMenuVisible] = useState(false); // Controls rating dropdown element visibility
   const [isUserFormVisible, setIsUserFormVisible] = useState(false); // Controls login/sign up form visibility
+  const [page, setPage] = useState(1); // Current page number
+  const [pageSize, setPageSize] = useState(10); // Number of products per page
 
   // Query for fetching all categories id's and name
   const {
@@ -80,6 +75,8 @@ const Home = () => {
         minRating,
         maxRating,
         sortOption,
+        page,
+        pageSize,
       },
     });
   }, [
@@ -89,6 +86,8 @@ const Home = () => {
     minRating,
     maxRating,
     sortOption,
+    page,
+    pageSize,
     fetchProductsByFilter,
   ]);
 
@@ -137,6 +136,12 @@ const Home = () => {
     }
   };
 
+  // Function to handle pagination change
+  const handlePaginationChange = (newPage, newPageSize) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
+  };
+
   // ---------- Event handlers for filter options ----------
 
   // Toggles the users selection of categories in the dropdown
@@ -156,17 +161,6 @@ const Home = () => {
     setSortOption(item.key);
   };
 
-  // Toggles the visibility of the dropdown menus since these event handlers are triggered by the onVisibleChange event
-  const handleCategoryMenuVisibleChange = (visible) => {
-    setCategoryMenuVisible(visible);
-  };
-  const handlePriceMenuVisibleChange = (visible) => {
-    setPriceMenuVisible(visible);
-  };
-  const handleRatingMenuVisibleChange = (visible) => {
-    setRatingMenuVisible(visible);
-  };
-
   // Resets the users selected filtering options
   const handleCategoryReset = () => {
     setSelectedCategories([]);
@@ -180,94 +174,9 @@ const Home = () => {
     setMaxRating(undefined);
   };
 
-  // ---------- Dropdown menus for filter options ----------
-
-  const categoryMenu = (
-    <Menu>
-      <Menu.Item key="reset" onClick={handleCategoryReset}>
-        Reset
-      </Menu.Item>
-      {categories.map((category) => (
-        <Menu.Item key={category._id}>
-          <Checkbox
-            checked={selectedCategories.includes(category._id)}
-            onChange={() => handleCategoryMenuClick(category)}
-          >
-            {category.name}
-          </Checkbox>
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
-
-  const priceMenu = (
-    <Menu>
-      <Menu.Item key="price">
-        <div>
-          <label>Min Price:</label>
-          <InputNumber
-            min={0}
-            value={minPrice}
-            onChange={(value) => setMinPrice(value !== "" ? value : undefined)}
-            style={{ marginLeft: 8 }}
-          />
-        </div>
-        <div>
-          <label>Max Price:</label>
-          <InputNumber
-            min={0}
-            value={maxPrice}
-            onChange={(value) => setMaxPrice(value !== "" ? value : undefined)}
-            style={{ marginLeft: 8 }}
-          />
-        </div>
-        <div>
-          <Button onClick={handlePriceReset}>Reset</Button>
-        </div>
-      </Menu.Item>
-    </Menu>
-  );
-
-  const ratingMenu = (
-    <Menu>
-      <Menu.Item key="rating">
-        <div>
-          <label>Min Rating:</label>
-          <InputNumber
-            min={0}
-            value={minRating}
-            onChange={(value) => setMinRating(value !== "" ? value : undefined)}
-            style={{ marginLeft: 8 }}
-          />
-        </div>
-        <div>
-          <label>Max Rating:</label>
-          <InputNumber
-            min={0}
-            value={maxRating}
-            onChange={(value) => setMaxRating(value !== "" ? value : undefined)}
-            style={{ marginLeft: 8 }}
-          />
-        </div>
-        <div>
-          <Button onClick={handleRatingReset}>Reset</Button>
-        </div>
-      </Menu.Item>
-    </Menu>
-  );
-
-  const sortMenu = (
-    <Menu onClick={handleSortMenuClick}>
-      <Menu.Item key="default">Default</Menu.Item>
-      <Menu.Item key="priceHighToLow">Price High to Low</Menu.Item>
-      <Menu.Item key="priceLowToHigh">Price Low to High</Menu.Item>
-      <Menu.Item key="ratingLowToHigh">Rating Low to High</Menu.Item>
-      <Menu.Item key="ratingHighToLow">Rating High to Low</Menu.Item>
-    </Menu>
-  );
-
   // Array containing the products that will be presented on the page after applying filters
-  const displayedProducts = filteredProdData?.filteredProducts || [];
+  const displayedProducts = filteredProdData?.filteredProducts?.products || [];
+  const totalProducts = filteredProdData?.filteredProducts?.numProducts || 0;
 
   // Rendered component
   return (
@@ -289,57 +198,24 @@ const Home = () => {
       </Title>
 
       <div style={{ marginBottom: "16px", textAlign: "center" }}>
-        <Space style={{ display: "flex", justifyContent: "space-between" }}>
-          <div style={{ display: "flex" }}>
-            <Dropdown
-              overlay={categoryMenu}
-              trigger={["click"]}
-              visible={categoryMenuVisible}
-              onVisibleChange={handleCategoryMenuVisibleChange}
-            >
-              <Button style={{ marginRight: "15px" }}>
-                <Space>
-                  Category
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
-            <Dropdown
-              overlay={priceMenu}
-              trigger={["click"]}
-              visible={priceMenuVisible}
-              onVisibleChange={handlePriceMenuVisibleChange}
-            >
-              <Button style={{ marginRight: "15px" }}>
-                <Space>
-                  Price
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
-            <Dropdown
-              overlay={ratingMenu}
-              trigger={["click"]}
-              visible={ratingMenuVisible}
-              onVisibleChange={handleRatingMenuVisibleChange}
-            >
-              <Button style={{ marginRight: "15px" }}>
-                <Space>
-                  Rating
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
-          </div>
-          <Dropdown overlay={sortMenu} trigger={["click"]}>
-            <Button style={{ marginBottom: "16px" }}>
-              <Space>
-                Sort By
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
-        </Space>
+        <FilterOptions
+          categories={categories}
+          selectedCategories={selectedCategories}
+          handleCategoryMenuClick={handleCategoryMenuClick}
+          handleCategoryReset={handleCategoryReset}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          handlePriceReset={handlePriceReset}
+          setMinPrice={setMinPrice}
+          setMaxPrice={setMaxPrice}
+          minRating={minRating}
+          maxRating={maxRating}
+          handleRatingReset={handleRatingReset}
+          setMinRating={setMinRating}
+          setMaxRating={setMaxRating}
+          sortOption={sortOption}
+          handleSortMenuClick={handleSortMenuClick}
+        />
       </div>
 
       <Row gutter={[16, 16]} justify="center">
@@ -411,6 +287,13 @@ const Home = () => {
           </Col>
         ))}
       </Row>
+      <Pagination
+        current={page}
+        pageSize={pageSize}
+        total={totalProducts}
+        onChange={handlePaginationChange}
+        style={{ marginTop: "24px", textAlign: "center" }}
+      />
       <Modal
         title="Login"
         visible={isUserFormVisible}

@@ -32,6 +32,11 @@ const typeDefs = gql`
     updatedAt: String!
   }
 
+  type FilteredProducts {
+    products: [Product!]!
+    numProducts: Int!
+  }
+
   type Category {
     _id: ID!
     name: String!
@@ -107,7 +112,7 @@ const typeDefs = gql`
       sortOption: String
       page: Int
       pageSize: Int
-    ): [Product!]!
+    ): FilteredProducts!
     searchProducts(searchTerm: String!): [Product!]!
     productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
 

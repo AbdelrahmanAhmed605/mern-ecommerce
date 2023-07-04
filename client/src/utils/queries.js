@@ -76,6 +76,8 @@ export const GET_FILTERED_PRODUCTS = gql`
     $minRating: Float
     $maxRating: Float
     $sortOption: String
+    $page: Int
+    $pageSize: Int
   ) {
     filteredProducts(
       categoryIds: $categoryIds
@@ -84,18 +86,24 @@ export const GET_FILTERED_PRODUCTS = gql`
       minRating: $minRating
       maxRating: $maxRating
       sortOption: $sortOption
+      page: $page
+      pageSize: $pageSize
     ) {
-      _id
-      title
-      price
-      image
-      averageRating
-      reviews {
+      products {
         _id
+        title
+        price
+        image
+        averageRating
+        reviews {
+          _id
+        }
       }
+      numProducts
     }
   }
 `;
+
 
 export const GET_PRODUCTS_BY_SEARCH = gql`
   query SearchProducts($searchTerm: String!) {
