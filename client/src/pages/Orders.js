@@ -88,72 +88,74 @@ const Orders = () => {
               <Row gutter={[16, 16]} justify="center">
                 {orders.map((order) => (
                   <Col key={order._id} xs={24} sm={12} md={8} lg={6}>
-                    <Card
-                      style={{
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <div>
-                        <Title level={4} style={{ marginBottom: "12px" }}>
-                          {order.name}
-                        </Title>
-                        <Text strong>Order ID: </Text>
-                        <Text>{order._id}</Text> {/* Display the order ID */}
-                        <Divider style={{ margin: "16px 0" }} />
-                        <Text strong>Date Ordered: </Text>
-                        <Text>{formatDateTime(order.createdAt)}</Text>
-                        <br />
-                        <Text strong>Last Updated: </Text>
-                        <Text>{formatDateTime(order.updatedAt)}</Text>
-                        <Divider style={{ margin: "16px 0" }} />
-                        <Text strong>Products:</Text>
-                        {order.products.map((product) => (
-                          <div
-                            key={product.productId._id}
+                    <Link to={`/confirmation/${order._id}`} target="_blank">
+                      <Card
+                        style={{
+                          borderRadius: "8px",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          <Title level={4} style={{ marginBottom: "12px" }}>
+                            {order.name}
+                          </Title>
+                          <Text strong>Order ID: </Text>
+                          <Text>{order._id}</Text> {/* Display the order ID */}
+                          <Divider style={{ margin: "16px 0" }} />
+                          <Text strong>Date Ordered: </Text>
+                          <Text>{formatDateTime(order.createdAt)}</Text>
+                          <br />
+                          <Text strong>Last Updated: </Text>
+                          <Text>{formatDateTime(order.updatedAt)}</Text>
+                          <Divider style={{ margin: "16px 0" }} />
+                          <Text strong>Products:</Text>
+                          {order.products.map((product) => (
+                            <div
+                              key={product.productId._id}
+                              style={{ marginTop: "16px" }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  margin: "8px 0",
+                                }}
+                              >
+                                <Avatar src={product.productId.image} />
+                                <Text style={{ marginLeft: "8px" }}>
+                                  {product.productId.title}
+                                </Text>
+                              </div>
+                              <div>
+                                <Text strong>Quantity: </Text>
+                                <Text>{product.orderQuantity}</Text>
+                              </div>
+                              <div>
+                                <Text strong>Price: </Text>
+                                <Text>${product.productId.price}</Text>
+                              </div>
+                              <Divider style={{ margin: "8px 0" }} />
+                            </div>
+                          ))}
+                          <Text strong>Total Amount: </Text>
+                          <Text>${order.totalAmount}</Text>
+                        </div>
+                        <div>
+                          <Divider style={{ margin: "16px 0" }} />
+                          <Text strong>Status: </Text>
+                          <Tag
+                            color={statusColors[order.status]}
                             style={{ marginTop: "16px" }}
                           >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                margin: "8px 0",
-                              }}
-                            >
-                              <Avatar src={product.productId.image} />
-                              <Text style={{ marginLeft: "8px" }}>
-                                {product.productId.title}
-                              </Text>
-                            </div>
-                            <div>
-                              <Text strong>Quantity: </Text>
-                              <Text>{product.orderQuantity}</Text>
-                            </div>
-                            <div>
-                              <Text strong>Price: </Text>
-                              <Text>${product.productId.price}</Text>
-                            </div>
-                            <Divider style={{ margin: "8px 0" }} />
-                          </div>
-                        ))}
-                        <Text strong>Total Amount: </Text>
-                        <Text>${order.totalAmount}</Text>
-                      </div>
-                      <div>
-                        <Divider style={{ margin: "16px 0" }} />
-                        <Text strong>Status: </Text>
-                        <Tag
-                          color={statusColors[order.status]}
-                          style={{ marginTop: "16px" }}
-                        >
-                          {order.status}
-                        </Tag>
-                      </div>
-                    </Card>
+                            {order.status}
+                          </Tag>
+                        </div>
+                      </Card>
+                    </Link>
                   </Col>
                 ))}
               </Row>
