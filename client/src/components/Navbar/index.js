@@ -178,11 +178,11 @@ const Navbar = () => {
             marginRight: "20px",
           }}
         >
-          Shop
+          Shop All
         </Link>
 
         {/* Dropdown menu for categories */}
-        <Dropdown overlay={categoriesMenu} trigger={["hover"]}>
+        {/* <Dropdown overlay={categoriesMenu} trigger={["hover"]}>
           <Link
             to="#"
             style={{
@@ -193,7 +193,7 @@ const Navbar = () => {
           >
             Categories <DownOutlined />
           </Link>
-        </Dropdown>
+        </Dropdown> */}
       </div>
 
       <div style={{ display: "flex", alignItems: "center" }}>

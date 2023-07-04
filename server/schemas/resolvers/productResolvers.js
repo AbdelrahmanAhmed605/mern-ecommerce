@@ -116,12 +116,18 @@ const productResolvers = {
           sortCriteria = { averageRating: -1, createdAt: -1 };
         }
 
-        const products = await Product.find(filter)
+        const productsQuery = Product.find(filter)
           .sort(sortCriteria) // Apply the modified sortCriteria
           .skip(skip)
           .limit(pageSize)
           .populate("categories")
           .populate("user");
+        
+        const [products, numProducts] = await Promise.all([
+          productsQuery.exec(),
+          Product.countDocuments(filter), // returns the number of documents obtained from the filtered results
+        ]);
+
 
         if (!products) {
           throw new UserInputError(
@@ -129,7 +135,10 @@ const productResolvers = {
           );
         }
 
-        return products;
+        return {
+          products,
+          numProducts,
+        };
       } catch (error) {
         if (error instanceof UserInputError) {
           throw error;
