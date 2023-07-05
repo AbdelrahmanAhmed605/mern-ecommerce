@@ -184,12 +184,8 @@ export const CREATE_REVIEW = gql`
 
 // Mutation for updating a review
 export const UPDATE_REVIEW = gql`
-  mutation UpdateReview(
-    $updateReviewId: ID!
-    $rating: Float
-    $comment: String
-  ) {
-    updateReview(id: $updateReviewId, rating: $rating, comment: $comment) {
+  mutation UpdateReview($id: ID!, $rating: Float, $comment: String) {
+    updateReview(id: $id, rating: $rating, comment: $comment) {
       _id
       rating
       comment
@@ -199,8 +195,8 @@ export const UPDATE_REVIEW = gql`
 
 // Mutation for deleting a review
 export const DELETE_REVIEW = gql`
-  mutation DeleteReview($deleteReviewId: ID!) {
-    deleteReview(id: $deleteReviewId) {
+  mutation DeleteReview($id: ID!) {
+    deleteReview(id: $id) {
       _id
       comment
     }
