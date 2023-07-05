@@ -96,6 +96,11 @@ const typeDefs = gql`
     updatedAt: String!
   }
 
+  type ReviewPagination {
+    reviews: [Review!]!
+    totalReviews: Int!
+  }
+
   type Query {
     me: User
     allUsers: [User!]!
@@ -126,6 +131,12 @@ const typeDefs = gql`
     developerOrder(orderId: ID!): Order
 
     reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
+    userProductReview(productId: ID!): Review
+    reviewForProducts(
+      productId: ID!
+      page: Int
+      pageSize: Int
+    ): ReviewPagination!
     developerReview(reviewId: ID!): Review
   }
   type Mutation {

@@ -23,6 +23,7 @@ const { Title, Text } = Typography;
 const Orders = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1); // State variable to keep track of the current page
+  const ordersPerPage = 4;
 
   // Fetch order details using the useQuery hook
   const {
@@ -33,7 +34,7 @@ const Orders = () => {
   } = useQuery(GET_ORDERS_BY_USER, {
     variables: {
       page: currentPage, // Use the currentPage state variable as the initial page value
-      pageSize: 4,
+      pageSize: ordersPerPage,
     },
   });
 
@@ -162,7 +163,7 @@ const Orders = () => {
               <Pagination
                 current={currentPage}
                 total={totalOrders}
-                pageSize={4}
+                pageSize={ordersPerPage}
                 onChange={handlePageChange}
                 style={{ marginTop: "24px", textAlign: "center" }}
               />

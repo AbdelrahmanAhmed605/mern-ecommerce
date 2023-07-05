@@ -104,7 +104,6 @@ export const GET_FILTERED_PRODUCTS = gql`
   }
 `;
 
-
 export const GET_PRODUCTS_BY_SEARCH = gql`
   query SearchProducts($searchTerm: String!) {
     searchProducts(searchTerm: $searchTerm) {
@@ -234,6 +233,50 @@ export const GET_ORDER = gql`
       totalAmount
       createdAt
       updatedAt
+    }
+  }
+`;
+
+// Query to get reviews for a specific product
+export const GET_REVIEWS_FOR_PRODUCT = gql`
+  query ReviewForProducts($productId: ID!, $page: Int, $pageSize: Int) {
+    reviewForProducts(productId: $productId, page: $page, pageSize: $pageSize) {
+      reviews {
+        _id
+        comment
+        rating
+        createdAt
+        updatedAt
+        product {
+          _id
+          title
+        }
+        user {
+          _id
+          username
+        }
+      }
+      totalReviews
+    }
+  }
+`;
+
+export const GET_USER_PRODUCT_REVIEW = gql`
+  query UserProductReview($productId: ID!) {
+    userProductReview(productId: $productId) {
+      _id
+      comment
+      rating
+      createdAt
+      updatedAt
+      product {
+        _id
+        title
+      }
+      user {
+        _id
+        username
+      }
     }
   }
 `;

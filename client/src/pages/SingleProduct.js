@@ -17,20 +17,22 @@ import { GET_SINGLE_PRODUCT, GET_ME } from "../utils/queries";
 import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import UserForm from "../components/UserForm";
+import ProductReviews from "../components/productReviews";
 
 const SingleProduct = () => {
   const { productId } = useParams();
   const [prodQuantity, setProdQuantity] = useState(1);
   const [isUserFormVisible, setIsUserFormVisible] = useState(false); // Controls login/sign up form visibility
 
-  const { loading: productLoading, data: productData } = useQuery(
-    GET_SINGLE_PRODUCT,
-    {
-      variables: {
-        productId: productId,
-      },
-    }
-  );
+  const {
+    loading: productLoading,
+    data: productData,
+    refetch: refetchProduct,
+  } = useQuery(GET_SINGLE_PRODUCT, {
+    variables: {
+      productId: productId,
+    },
+  });
   const product = productData?.product || {};
 
   // Lazy Query for fetching the currently logged in user
@@ -140,7 +142,7 @@ const SingleProduct = () => {
               <Rate
                 allowHalf
                 disabled
-                defaultValue={product.averageRating || 0}
+                value={product.averageRating || 0}
                 style={{
                   color: "#ffd700",
                   marginRight: "8px",
@@ -210,6 +212,7 @@ const SingleProduct = () => {
           </div>
         </Col>
       </Row>
+      <ProductReviews productId={productId} refetchProduct={refetchProduct} />
       <Modal
         title="Login"
         visible={isUserFormVisible}
