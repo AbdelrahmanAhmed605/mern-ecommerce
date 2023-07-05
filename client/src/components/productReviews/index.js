@@ -35,7 +35,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
   const [submitting, setSubmitting] = useState(false); // Track if the review is being submitted
 
   // Determines number of reviews shown per one pagination section/page
-  const reviewsPerPage = 2;
+  const reviewsPerPage = 5;
 
   // Queries
 
