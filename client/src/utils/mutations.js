@@ -41,10 +41,24 @@ export const CREATE_USER = gql`
   }
 `;
 
-// Mutation for updating a user
+// Mutation for updating a user's information (email and username)
 export const UPDATE_USER = gql`
-  mutation UpdateUser($username: String, $email: String) {
-    updateUser(username: $username, email: $email) {
+  mutation UpdateUser($newUsername: String, $newEmail: String) {
+    updateUser(newUsername: $newUsername, newEmail: $newEmail) {
+      _id
+      email
+      username
+    }
+  }
+`;
+
+// Mutation for updating a user's password
+export const UPDATE_USER_PASSWORD = gql`
+  mutation UpdateUserPassword($currentPassword: String!, $newPassword: String!) {
+    updateUserPassword(
+      currentPassword: $currentPassword
+      newPassword: $newPassword
+    ) {
       _id
       email
       username
