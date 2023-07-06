@@ -135,7 +135,7 @@ const Navbar = () => {
       <Menu.Item key="settings" icon={<SettingOutlined />}>
         {/* Link to the user settings page */}
         <Link
-          to="/user/settings"
+          to="/user/profile"
           style={{ color: "inherit", textDecoration: "none" }}
         >
           Settings
