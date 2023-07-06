@@ -156,6 +156,8 @@ const userResolvers = {
             invalidArgs: args,
             validationErrors: errorMessages,
           });
+        } else if (error instanceof AuthenticationError) {
+          throw error;
         } else {
           // Throwing a generic error message when failed to create a user
           throw new Error("Failed to create user");
@@ -170,31 +172,40 @@ const userResolvers = {
           throw new AuthenticationError("You need to be logged in!");
         }
 
-        // Ensure user does not change username to an already existing one
-        const existingUsername = await User.findOne({
-          username: args.username,
-        });
-        if (existingUsername) {
-          throw new UserInputError("Username already in use", {
-            invalidArgs: { username: args.username },
-          });
-        }
-
-        // Check if the email already exists
-        const existingEmail = await User.findOne({ email: args.email });
-        if (existingEmail) {
-          throw new UserInputError("Email already in use", {
-            invalidArgs: { email: args.email },
-          });
-        }
-
-        const user = await User.findByIdAndUpdate(context.user._id, args, {
-          new: true,
-        });
+        const user = await User.findById(context.user._id);
 
         if (!user) {
           throw new UserInputError("User not found");
         }
+
+        if (args.newUsername) {
+          // Ensure user does not change username to an already existing one
+          const existingUsername = await User.findOne({
+            username: args.newUsername,
+          });
+          if (existingUsername) {
+            throw new UserInputError("Username already in use", {
+              invalidArgs: { username: args.newUsername },
+            });
+          } else {
+            user.username = args.newUsername;
+          }
+        }
+
+        if (args.newEmail) {
+          // Check if the email already exists
+          const existingEmail = await User.findOne({ email: args.newEmail });
+          if (existingEmail) {
+            throw new UserInputError("Email already in use", {
+              invalidArgs: { email: args.newEmail },
+            });
+          } else {
+            user.email = args.newEmail;
+          }
+        }
+
+        // This will apply the model schema validation checks on the new username and email
+        await user.save();
 
         return user;
       } catch (error) {
@@ -213,9 +224,67 @@ const userResolvers = {
             invalidArgs: args,
             validationErrors: errorMessages,
           });
+        } else if (error instanceof AuthenticationError) {
+          throw error;
         } else {
           // Throwing a generic error message when failed to create a user
-          throw new Error("Failed to create user");
+          throw new Error("Failed to update user");
+        }
+      }
+    },
+
+    // Mutation to update the user password
+    updateUserPassword: async (
+      parent,
+      { currentPassword, newPassword },
+      context
+    ) => {
+      try {
+        if (!context.user) {
+          throw new AuthenticationError("You need to be logged in!");
+        }
+
+        const user = await User.findById(context.user._id);
+
+        if (!user) {
+          throw new UserInputError("User not found");
+        }
+
+        // Check if the provided password is correct
+        const correctPw = await user.isCorrectPassword(currentPassword);
+        // Throw an error if the password is incorrect
+        if (!correctPw) {
+          throw new UserInputError("Incorrect password");
+        }
+
+        // Change the user's password
+        user.password = newPassword;
+
+        // This will apply the model schema validation checks on the new password and apply the middleware to hash it
+        await user.save();
+
+        return user;
+      } catch (error) {
+        if (error instanceof UserInputError) {
+          throw error;
+        } else if (error.name === "ValidationError") {
+          // Handling validation errors
+          const errorMessages = Object.values(error.errors).map(
+            (validationError) => validationError.message
+          );
+
+          // Throwing a validation error with the custom error messages
+          const errorMessage =
+            errorMessages.length > 0 ? errorMessages[0] : "Validation error";
+          throw new UserInputError(errorMessage, {
+            invalidArgs: newPassword,
+            validationErrors: errorMessages,
+          });
+        } else if (error instanceof AuthenticationError) {
+          throw error;
+        } else {
+          // Throwing a generic error message when failed to create a user
+          throw new Error("Failed to update password");
         }
       }
     },

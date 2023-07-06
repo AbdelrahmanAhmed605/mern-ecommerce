@@ -148,7 +148,8 @@ const typeDefs = gql`
       password: String!
       email: String!
     ): Auth
-    updateUser(username: String, email: String): User
+    updateUser(newUsername: String, newEmail: String): User
+    updateUserPassword(currentPassword: String!, newPassword: String!): User
     deleteUser: User
     adminDeleteUser(userId: ID!): User
 
