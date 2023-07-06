@@ -3,8 +3,11 @@ import { useMutation } from "@apollo/client";
 import { CREATE_USER, LOGIN_USER } from "../../utils/mutations";
 import { Form, Input, Button, Row, Col, message } from "antd";
 import AuthService from "../../utils/auth";
+import useUserStore from "../../store/userStore";
 
 const UserForm = () => {
+  const setUserLoggedIn = useUserStore((state) => state.setIsLoggedIn);
+
   // mutation to create a new user
   const [createUser, { loading: signupLoading }] = useMutation(CREATE_USER);
 
@@ -17,6 +20,7 @@ const UserForm = () => {
       const { data } = await createUser({ variables: values });
       // Log in the user by storing the token in the AuthService utility
       AuthService.login(data.createUser.token);
+      setUserLoggedIn(true);
     } catch (err) {
       if (err.graphQLErrors.length > 0) {
         const extensions = err.graphQLErrors[0].extensions;
@@ -41,6 +45,7 @@ const UserForm = () => {
       const { data } = await loginUser({ variables: values });
       // Log in the user by storing the token in the AuthService utility
       AuthService.login(data.login.token);
+      setUserLoggedIn(true);
     } catch (err) {
       if (err.graphQLErrors.length > 0) {
         // Display the first error message from the GraphQL errors array
