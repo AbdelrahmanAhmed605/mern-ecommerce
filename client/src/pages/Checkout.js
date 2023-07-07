@@ -52,6 +52,8 @@ const Checkout = () => {
   const [sameAsShipping, setSameAsShipping] = useState(false);
   // State indicating whether the user has completed filling the shipping information
   const [shippingInfoCompleted, setShippingInfoCompleted] = useState(false);
+  // Tax Rate applied to product purchase
+  const taxRate = 0.05;
 
   const navigate = useNavigate();
 
@@ -89,7 +91,7 @@ const Checkout = () => {
   const deliveryCost = cart.totalPrice > 100 ? 0 : 10;
 
   // Calculate total price including order value, delivery cost, and estimated tax
-  const totalPrice = cart.totalPrice + deliveryCost + 0.05 * cart.totalPrice;
+  const totalPrice = cart.totalPrice + deliveryCost + taxRate * cart.totalPrice;
 
   // Validation rules for the postal code field
   const postalCodeValidationRules = [
@@ -186,8 +188,9 @@ const Checkout = () => {
       const { client_secret } = await response.json();
 
       // Process the payment using Stripe API
-      const { error: paymentError } =
-        await stripe.confirmCardPayment(client_secret, {
+      const { error: paymentError } = await stripe.confirmCardPayment(
+        client_secret,
+        {
           payment_method: {
             card: elements.getElement(CardElement),
             billing_details: {
@@ -200,7 +203,8 @@ const Checkout = () => {
               },
             },
           },
-        });
+        }
+      );
 
       if (paymentError) {
         message.error("Payment failed");
