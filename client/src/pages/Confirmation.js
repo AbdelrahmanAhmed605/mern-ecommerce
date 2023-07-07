@@ -2,16 +2,7 @@ import React from "react";
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 
-import {
-  Spin,
-  Result,
-  Card,
-  Row,
-  Col,
-  Typography,
-  Avatar,
-  Divider,
-} from "antd";
+import { Spin, Alert, Card, Row, Col, Typography, Avatar, Divider } from "antd";
 import {
   EnvironmentOutlined,
   ClockCircleOutlined,
@@ -55,7 +46,15 @@ const Confirmation = () => {
 
   // If there's an error fetching the order details, display an error message
   if (orderError) {
-    return <Result status="error" title="Failed to fetch order details" />;
+    return (
+      <Alert
+        message="Error"
+        description="Failed to fetch order details. Please try again later."
+        type="error"
+        showIcon
+        style={{ marginTop: "8px" }}
+      />
+    );
   }
 
   // Extract the order object from the fetched data, or initialize an empty object if it doesn't exist
