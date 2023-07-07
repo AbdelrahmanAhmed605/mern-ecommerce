@@ -6,15 +6,19 @@
   "scripts": {
     "start": "node server --ignore client",
     "develop": "concurrently \"cd server && npm run start\" \"cd client && npm start\"",
+    "heroku-postbuild": "cd client && npm install && npm run build",
     "install": "cd server && npm i && cd ../client && npm i",
     "seed": "cd server && npm run seed",
     "build": "cd client && npm run build"
   },
-  "keywords": [],
+  "keywords": ["mern","ecommerce","project"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "concurrently": "^8.2.0",
     "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": "16.19.0"
   }
 }
