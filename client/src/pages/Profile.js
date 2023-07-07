@@ -24,13 +24,12 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import AuthService from "../utils/auth";
-import useUserStore from "../store/userStore";
+import { useLoginStatusStore } from "../store/userStore";
 
 const { Title } = Typography;
 
 const Profile = () => {
-  const isLoggedIn = useUserStore((state) => state.isLoggedIn); // checks if the user is logged in
-//   const [form] = Form.useForm();
+  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn); // checks if the user is logged in
   const [loading, setLoading] = useState(false);
   const [editUsername, setEditUsername] = useState(false);
   const [editEmail, setEditEmail] = useState(false);
@@ -161,151 +160,151 @@ const Profile = () => {
     <div>
       <Title level={2}>Welcome, {me.username}!</Title>
 
-      <Card style={{ width: "400px", margin: "0 auto" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          <UserOutlined style={{ fontSize: "24px", marginRight: "10px" }} />
-          <span style={{ fontWeight: "bold" }}>Username:</span>
-          <span style={{ marginLeft: "10px" }}>{me.username}</span>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => setEditUsername(true)}
-            style={{ marginLeft: "auto" }}
-          />
-        </div>
-        {editUsername ? (
-          <Form
-            // form={form}
-            layout="vertical"
-            onFinish={handleUpdateUsername}
-            initialValues={{ newUsername: me.username }}
+      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <Card style={{ margin: "0 auto" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
           >
-            <Form.Item
-              name="newUsername"
-              rules={[
-                { required: true, message: "Please enter a new username." },
-              ]}
+            <UserOutlined style={{ fontSize: "24px", marginRight: "10px" }} />
+            <span style={{ fontWeight: "bold" }}>Username:</span>
+            <span style={{ marginLeft: "10px" }}>{me.username}</span>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => setEditUsername(true)}
+              style={{ marginLeft: "auto" }}
+            />
+          </div>
+          {editUsername ? (
+            <Form
+              layout="vertical"
+              onFinish={handleUpdateUsername}
+              initialValues={{ newUsername: me.username }}
             >
-              <Input placeholder="New Username" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" loading={loading} htmlType="submit">
-                Update Username
+              <Form.Item
+                name="newUsername"
+                rules={[
+                  { required: true, message: "Please enter a new username." },
+                ]}
+              >
+                <Input placeholder="New Username" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" loading={loading} htmlType="submit">
+                  Update Username
+                </Button>
+              </Form.Item>
+              <Button type="link" onClick={() => setEditUsername(false)}>
+                Cancel
               </Button>
-            </Form.Item>
-            <Button type="link" onClick={() => setEditUsername(false)}>
-              Cancel
-            </Button>
-          </Form>
-        ) : null}
-      </Card>
+            </Form>
+          ) : null}
+        </Card>
 
-      <Card style={{ width: "400px", margin: "20px auto" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          <MailOutlined style={{ fontSize: "24px", marginRight: "10px" }} />
-          <span style={{ fontWeight: "bold" }}>Email:</span>
-          <span style={{ marginLeft: "10px" }}>{me.email}</span>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => setEditEmail(true)}
-            style={{ marginLeft: "auto" }}
-          />
-        </div>
-        {editEmail ? (
-          <Form
-            // form={form}
-            layout="vertical"
-            onFinish={handleUpdateEmail}
-            initialValues={{ newEmail: me.email }}
+        <Card style={{ margin: "20px auto" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
           >
-            <Form.Item
-              name="newEmail"
-              rules={[
-                { required: true, message: "Please enter a new email." },
-                { type: "email", message: "Please enter a valid email." },
-              ]}
+            <MailOutlined style={{ fontSize: "24px", marginRight: "10px" }} />
+            <span style={{ fontWeight: "bold" }}>Email:</span>
+            <span style={{ marginLeft: "10px" }}>{me.email}</span>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => setEditEmail(true)}
+              style={{ marginLeft: "auto" }}
+            />
+          </div>
+          {editEmail ? (
+            <Form
+              layout="vertical"
+              onFinish={handleUpdateEmail}
+              initialValues={{ newEmail: me.email }}
             >
-              <Input placeholder="New Email" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" loading={loading} htmlType="submit">
-                Update Email
+              <Form.Item
+                name="newEmail"
+                rules={[
+                  { required: true, message: "Please enter a new email." },
+                  { type: "email", message: "Please enter a valid email." },
+                ]}
+              >
+                <Input placeholder="New Email" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" loading={loading} htmlType="submit">
+                  Update Email
+                </Button>
+              </Form.Item>
+              <Button type="link" onClick={() => setEditEmail(false)}>
+                Cancel
               </Button>
-            </Form.Item>
-            <Button type="link" onClick={() => setEditEmail(false)}>
-              Cancel
-            </Button>
-          </Form>
-        ) : null}
-      </Card>
+            </Form>
+          ) : null}
+        </Card>
 
-      <Card style={{ width: "400px", margin: "20px auto" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          <LockOutlined style={{ fontSize: "24px", marginRight: "10px" }} />
-          <span style={{ fontWeight: "bold" }}>Password:</span>
-          <span style={{ marginLeft: "10px" }}>*********</span>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => setEditPassword(true)}
-            style={{ marginLeft: "auto" }}
-          />
-        </div>
-        {editPassword ? (
-          <Form
-            layout="vertical"
-            onFinish={handleUpdatePassword}
-            initialValues={{ currentPassword: "", newPassword: "" }}
+        <Card style={{ margin: "20px auto" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
           >
-            <Form.Item
-              name="currentPassword"
-              rules={[
-                {
-                  required: true,
-                  message: "Please enter your current password.",
-                },
-              ]}
+            <LockOutlined style={{ fontSize: "24px", marginRight: "10px" }} />
+            <span style={{ fontWeight: "bold" }}>Password:</span>
+            <span style={{ marginLeft: "10px" }}>*********</span>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => setEditPassword(true)}
+              style={{ marginLeft: "auto" }}
+            />
+          </div>
+          {editPassword ? (
+            <Form
+              layout="vertical"
+              onFinish={handleUpdatePassword}
+              initialValues={{ currentPassword: "", newPassword: "" }}
             >
-              <Input.Password placeholder="Current Password" />
-            </Form.Item>
-            <Form.Item
-              name="newPassword"
-              rules={[
-                { required: true, message: "Please enter a new password." },
-              ]}
-            >
-              <Input.Password placeholder="New Password" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" loading={loading} htmlType="submit">
-                Update Password
+              <Form.Item
+                name="currentPassword"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter your current password.",
+                  },
+                ]}
+              >
+                <Input.Password placeholder="Current Password" />
+              </Form.Item>
+              <Form.Item
+                name="newPassword"
+                rules={[
+                  { required: true, message: "Please enter a new password." },
+                ]}
+              >
+                <Input.Password placeholder="New Password" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" loading={loading} htmlType="submit">
+                  Update Password
+                </Button>
+              </Form.Item>
+              <Button type="link" onClick={() => setEditPassword(false)}>
+                Cancel
               </Button>
-            </Form.Item>
-            <Button type="link" onClick={() => setEditPassword(false)}>
-              Cancel
-            </Button>
-          </Form>
-        ) : null}
-      </Card>
+            </Form>
+          ) : null}
+        </Card>
+      </div>
 
       <div style={{ textAlign: "center" }}>
         <Divider />
