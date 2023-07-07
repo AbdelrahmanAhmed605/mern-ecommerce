@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { Button, InputNumber, Table, Space, Spin } from "antd";
 import { Link } from "react-router-dom";
@@ -81,7 +81,12 @@ const ShoppingCart = () => {
         <InputNumber
           min={1}
           value={quantity}
-          style={{ marginLeft: "8px", marginRight: "8px", fontSize: "18px" }}
+          style={{
+            width: "200px",
+            marginLeft: "8px",
+            marginRight: "8px",
+            fontSize: "18px",
+          }}
           formatter={(value) => `${value}`}
           parser={(value) => parseInt(value)}
           onChange={(value) => handleQuantityChange(value, record._id)}
@@ -151,6 +156,7 @@ const ShoppingCart = () => {
           columns={columns}
           rowKey={(record) => record._id}
           pagination={false}
+          scroll={{ x: true }} // Enable horizontal scrolling
         />
       )}
       <div style={{ marginTop: "20px" }}>
