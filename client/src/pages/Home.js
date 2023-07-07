@@ -286,7 +286,7 @@ const Home = () => {
                         src={product.image}
                         alt={product.title}
                         style={{
-                          width: "100%",
+                          width: "70%",
                           borderRadius: "8px",
                         }}
                       />

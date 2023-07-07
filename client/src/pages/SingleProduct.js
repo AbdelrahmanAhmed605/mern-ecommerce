@@ -138,7 +138,7 @@ const SingleProduct = () => {
             src={product.image}
             alt={product.title}
             style={{
-              width: "100%",
+              width: "70%",
               maxWidth: "400px",
               borderRadius: "8px",
             }}
