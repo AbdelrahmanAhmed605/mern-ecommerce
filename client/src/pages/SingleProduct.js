@@ -18,11 +18,19 @@ import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import UserForm from "../components/UserForm";
 import ProductReviews from "../components/productReviews";
+import { useSignUpAndLoginStore } from "../store/userStore";
+import { ShoppingOutlined } from "@ant-design/icons";
+
 
 const SingleProduct = () => {
   const { productId } = useParams();
   const [prodQuantity, setProdQuantity] = useState(1);
-  const [isUserFormVisible, setIsUserFormVisible] = useState(false); // Controls login/sign up form visibility
+  const userFormVisibility = useSignUpAndLoginStore(
+    (state) => state.userFormVisibility
+  );
+  const setUserFormVisibility = useSignUpAndLoginStore(
+    (state) => state.setUserFormVisibility
+  );
 
   const {
     loading: productLoading,
@@ -60,14 +68,14 @@ const SingleProduct = () => {
   const handleAddToCart = async () => {
     // Check if the user is currently logged in
     if (!AuthService.loggedIn()) {
-      setIsUserFormVisible(true); // Display the user form or login/signup modal if user is not logged in
+      setUserFormVisibility(true); // Display the user form or login/signup modal if user is not logged in
 
       // Repeatedly check if the user is logged in and only continue with the function once the login is successful
       await new Promise((resolve) => {
         const checkUserInterval = setInterval(() => {
           if (AuthService.loggedIn()) {
             clearInterval(checkUserInterval); // Stop checking the login status
-            setIsUserFormVisible(false); // Hide the user form or login/signup modal
+            setUserFormVisibility(false); // Hide the user form or login/signup modal
             resolve(); // Fulfill the promise and resume execution
           }
         }, 500); // Check every 500 milliseconds if the user is logged in
@@ -204,6 +212,7 @@ const SingleProduct = () => {
               type="primary"
               shape="round"
               size="large"
+              icon={<ShoppingOutlined />}
               onClick={handleAddToCart}
               style={{ width: "100%", fontSize: "20px" }}
             >
@@ -215,8 +224,8 @@ const SingleProduct = () => {
       <ProductReviews productId={productId} refetchProduct={refetchProduct} />
       <Modal
         title="Login"
-        visible={isUserFormVisible}
-        onCancel={() => setIsUserFormVisible(false)}
+        visible={userFormVisibility}
+        onCancel={() => setUserFormVisibility(false)}
         footer={null}
       >
         <UserForm />
