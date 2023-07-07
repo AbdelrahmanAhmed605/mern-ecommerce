@@ -12,12 +12,12 @@ const productResolvers = {
       try {
         const skip = (page - 1) * pageSize; // Calculate the number of documents to skip based on the current page and page size
         const products = await Product.find()
+          .sort({ createdAt: -1 }) // Sort by descending order of createdAt field
+          .skip(skip)
+          .limit(pageSize) // Retrieve only the specified number of products per page
           .populate("categories")
           .populate("user")
-          .populate("reviews")
-          .sort({ updatedAt: -1 }) // Sort by descending order of updatedAt field
-          .skip(skip)
-          .limit(pageSize); // Retrieve only the specified number of products per page
+          .populate("reviews");
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");
@@ -46,83 +46,141 @@ const productResolvers = {
       }
     },
 
+    // Resolver for fetching filtered products based on various input parameters
+    // - categoryIds: array of category IDs to filter by
+    // - minPrice, maxPrice: price range to filter by
+    // - minRating, maxRating: rating range to filter by
+    // - sortOption: sorting option for the products
+    // - page, pageSize: pagination parameters for the result set
+    filteredProducts: async (parent, args) => {
+      try {
+        // Destructuring input arguments
+        const {
+          categoryIds,
+          minPrice,
+          maxPrice,
+          minRating,
+          maxRating,
+          sortOption,
+          page = 1,
+          pageSize = 10,
+        } = args;
+
+        const skip = (page - 1) * pageSize; // Calculate skip value for pagination
+
+        let filter = {}; // Object to hold filter criteria
+
+        if (categoryIds && categoryIds.length > 0) {
+          // Filter by category IDs if provided
+          filter.categories = { $in: categoryIds };
+        }
+
+        if (minPrice != null && maxPrice != null) {
+          // Filter by price range if both minPrice and maxPrice are provided
+          if (minPrice > maxPrice) {
+            throw new UserInputError("Invalid price range");
+          }
+          filter.price = { $gte: minPrice, $lte: maxPrice };
+        } else if (minPrice != null) {
+          // Filter by minimum price if only minPrice is provided
+          filter.price = { $gte: minPrice };
+        } else if (maxPrice != null) {
+          // Filter by maximum price if only maxPrice is provided
+          filter.price = { $lte: maxPrice };
+        }
+
+        if (minRating != null && maxRating != null) {
+          // Filter by rating range if both minRating and maxRating are provided
+          if (minRating > maxRating) {
+            throw new UserInputError("Invalid rating range");
+          }
+          filter.averageRating = { $gte: minRating, $lte: maxRating };
+        } else if (minRating != null) {
+          // Filter by minimum rating if only minRating is provided
+          filter.averageRating = { $gte: minRating };
+        } else if (maxRating != null) {
+          // Filter by maximum rating if only maxRating is provided
+          filter.averageRating = { $lte: maxRating };
+        }
+
+        let sortCriteria = { createdAt: -1 }; // Default sorting by createdAt
+
+        // Modify sortCriteria based on the sortOption
+        if (sortOption === "priceHighToLow") {
+          sortCriteria = { price: -1, createdAt: -1 };
+        } else if (sortOption === "priceLowToHigh") {
+          sortCriteria = { price: 1, createdAt: -1 };
+        } else if (sortOption === "reviewLowToHigh") {
+          sortCriteria = { averageRating: 1, createdAt: -1 };
+        } else if (sortOption === "reviewHighToLow") {
+          sortCriteria = { averageRating: -1, createdAt: -1 };
+        }
+
+        const productsQuery = Product.find(filter)
+          .sort(sortCriteria) // Apply the modified sortCriteria
+          .skip(skip)
+          .limit(pageSize)
+          .populate("categories")
+          .populate("user");
+
+        const [products, totalProducts] = await Promise.all([
+          productsQuery.exec(),
+          Product.countDocuments(filter), // returns the number of documents obtained from the filtered results
+        ]);
+
+        if (!products) {
+          throw new UserInputError(
+            "Could not find any products with given filters"
+          );
+        }
+
+        return {
+          products,
+          totalProducts,
+        };
+      } catch (error) {
+        if (error instanceof UserInputError) {
+          throw error;
+        } else {
+          throw new Error("Failed to fetch products");
+        }
+      }
+    },
+
+    // Resolver for searching products based on a search term
+    // - searchTerm: the term to search for in the product titles
+    searchProducts: async (parent, { searchTerm, page = 1, pageSize = 10 }) => {
+      try {
+        const regex = new RegExp(searchTerm, "i"); // Case-insensitive regex pattern
+        const skip = (page - 1) * pageSize; // Calculate skip value for pagination
+
+        const productsQuery = await Product.find({ title: { $regex: regex } })
+          .skip(skip)
+          .limit(pageSize)
+          .populate("categories")
+          .populate("user");
+
+        const [products, totalProducts] = await Promise.all([
+          productsQuery,
+          Product.countDocuments({ title: { $regex: regex } }), // returns the number of documents obtained from the search results
+        ]);
+
+        return { products, totalProducts };
+      } catch (error) {
+        throw new Error("Failed to search products");
+      }
+    },
+
     // Resolver for fetching products by user ID
     productsByUser: async (parent, { userId, page = 1, pageSize = 10 }) => {
       try {
         const skip = (page - 1) * pageSize;
         const products = await Product.find({ user: userId })
-          .populate("categories")
-          .populate("user")
-          .sort({ updatedAt: -1 })
+          .sort({ createdAt: -1 })
           .skip(skip)
-          .limit(pageSize);
-        return products;
-      } catch (error) {
-        throw new Error("Failed to fetch products");
-      }
-    },
-
-    // Resolver for fetching products by category IDs
-    productsByCategory: async (
-      parent,
-      { categoryIds, page = 1, pageSize = 10 }
-    ) => {
-      try {
-        const skip = (page - 1) * pageSize;
-        const products = await Product.find({
-          categories: { $in: categoryIds },
-        })
+          .limit(pageSize)
           .populate("categories")
-          .populate("user")
-          .sort({ updatedAt: -1 })
-          .skip(skip)
-          .limit(pageSize);
-        return products;
-      } catch (error) {
-        throw new Error("Failed to fetch products");
-      }
-    },
-
-    // Resolver for fetching products by price range
-    productsByPriceRange: async (
-      parent,
-      { minPrice, maxPrice, page = 1, pageSize = 10 }
-    ) => {
-      try {
-        const skip = (page - 1) * pageSize;
-        const products = await Product.find({
-          price: { $gte: minPrice, $lte: maxPrice },
-        })
-          .populate("categories")
-          .populate("user")
-          .sort({ updatedAt: -1 })
-          .skip(skip)
-          .limit(pageSize);
-        return products;
-      } catch (error) {
-        throw new Error("Failed to fetch products");
-      }
-    },
-
-    // Resolver for fetching products by review rating range
-    productsByReviewRating: async (
-      parent,
-      { minRating, maxRating, page = 1, pageSize = 10 }
-    ) => {
-      try {
-        if (minRating > maxRating) {
-          throw new UserInputError("Invalid rating range");
-        }
-        const skip = (page - 1) * pageSize;
-        const products = await Product.find({
-          averageRating: { $gte: minRating, $lte: maxRating },
-        })
-          .populate("categories")
-          .populate("user")
-          .sort({ updatedAt: -1 })
-          .skip(skip)
-          .limit(pageSize);
-
+          .populate("user");
         return products;
       } catch (error) {
         throw new Error("Failed to fetch products");

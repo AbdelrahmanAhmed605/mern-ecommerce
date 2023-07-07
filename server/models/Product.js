@@ -15,7 +15,8 @@ const productSchema = new Schema(
     },
     averageRating: {
       type: Number,
-      default: 0,
+      default: null,
+      index: true,
     },
     price: {
       type: Number,
@@ -24,6 +25,7 @@ const productSchema = new Schema(
         validator: (value) => value >= 0,
         message: "Price must be a non-negative value",
       },
+      index: true,
     },
     stockQuantity: {
       type: Number,
@@ -45,6 +47,7 @@ const productSchema = new Schema(
         type: Schema.Types.ObjectId,
         ref: "Category",
         required: [true, "Product category is required"],
+        index: true,
       },
     ],
     user: {

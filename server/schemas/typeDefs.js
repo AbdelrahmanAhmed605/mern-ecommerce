@@ -10,11 +10,7 @@ const typeDefs = gql`
     _id: ID!
     role: String!
     username: String!
-    firstName: String!
-    lastName: String!
     email: String!
-    address: String!
-    phone: String!
     cart: Cart
     products: [Product!]
     createdAt: String!
@@ -24,7 +20,7 @@ const typeDefs = gql`
   type Product {
     _id: ID!
     title: String!
-    averageRating: Float!
+    averageRating: Float
     description: String!
     price: Float!
     stockQuantity: Int!
@@ -34,6 +30,11 @@ const typeDefs = gql`
     reviews: [Review!]!
     createdAt: String!
     updatedAt: String!
+  }
+
+  type productPagination {
+    products: [Product!]!
+    totalProducts: Int!
   }
 
   type Category {
@@ -59,8 +60,10 @@ const typeDefs = gql`
     _id: ID!
     user: User!
     products: [OrderProduct!]!
+    name: String!
+    email: String!
     totalAmount: Float!
-    address: String!
+    address: OrderAddress!
     status: String!
     createdAt: String!
     updatedAt: String!
@@ -69,6 +72,18 @@ const typeDefs = gql`
   type OrderProduct {
     productId: Product!
     orderQuantity: Int!
+  }
+
+  type OrderAddress {
+    street: String!
+    city: String!
+    state: String!
+    postalCode: String!
+  }
+
+  type OrderPagination {
+    orders: [Order!]!
+    totalOrders: Int!
   }
 
   type Review {
@@ -81,6 +96,11 @@ const typeDefs = gql`
     updatedAt: String!
   }
 
+  type ReviewPagination {
+    reviews: [Review!]!
+    totalReviews: Int!
+  }
+
   type Query {
     me: User
     allUsers: [User!]!
@@ -88,24 +108,22 @@ const typeDefs = gql`
 
     products(page: Int, pageSize: Int): [Product!]!
     product(id: ID!): Product
-    productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
-    productsByCategory(
+    filteredProducts(
       categoryIds: [ID!]
+      minPrice: Float
+      maxPrice: Float
+      minRating: Float
+      maxRating: Float
+      sortOption: String
       page: Int
       pageSize: Int
-    ): [Product!]!
-    productsByPriceRange(
-      minPrice: Float!
-      maxPrice: Float!
+    ): productPagination!
+    searchProducts(
+      searchTerm: String!
       page: Int
       pageSize: Int
-    ): [Product!]!
-    productsByReviewRating(
-      minRating: Float!
-      maxRating: Float!
-      page: Int
-      pageSize: Int
-    ): [Product!]!
+    ): productPagination!
+    productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
 
     categories: [Category!]!
     category(id: ID!): Category
@@ -113,10 +131,16 @@ const typeDefs = gql`
     cart: Cart
 
     order(id: ID!): Order
-    ordersByUser(page: Int, pageSize: Int): [Order!]!
+    ordersByUser(page: Int, pageSize: Int): OrderPagination!
     developerOrder(orderId: ID!): Order
 
     reviewsByUser(userId: ID!, page: Int, pageSize: Int): [Review!]!
+    userProductReview(productId: ID!): Review
+    reviewForProducts(
+      productId: ID!
+      page: Int
+      pageSize: Int
+    ): ReviewPagination!
     developerReview(reviewId: ID!): Review
   }
   type Mutation {
@@ -126,20 +150,10 @@ const typeDefs = gql`
       role: String!
       username: String!
       password: String!
-      firstName: String!
-      lastName: String!
       email: String!
-      address: String!
-      phone: String!
     ): Auth
-    updateUser(
-      username: String
-      firstName: String
-      lastName: String
-      email: String
-      address: String
-      phone: String
-    ): User
+    updateUser(newUsername: String, newEmail: String): User
+    updateUserPassword(currentPassword: String!, newPassword: String!): User
     deleteUser: User
     adminDeleteUser(userId: ID!): User
 
@@ -173,18 +187,21 @@ const typeDefs = gql`
     resetCart: Cart
 
     createOrder(
+      name: String!
+      email: String!
       products: [OrderProductInput!]!
       totalAmount: Float!
-      address: String!
+      address: OrderAddressInput!
       status: String!
     ): Order
     updateOrder(
       id: ID!
+      name: String
+      email: String
       products: [OrderProductInput!]
       totalAmount: Float
-      address: String
+      address: OrderAddressInput
       status: String
-      userId: ID!
     ): Order
 
     createReview(productId: ID!, rating: Float!, comment: String!): Review
@@ -196,6 +213,12 @@ const typeDefs = gql`
   input OrderProductInput {
     productId: ID!
     orderQuantity: Int!
+  }
+  input OrderAddressInput {
+    street: String!
+    city: String!
+    state: String!
+    postalCode: String!
   }
 `;
 

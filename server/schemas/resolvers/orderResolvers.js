@@ -46,11 +46,19 @@ const orderResolvers = {
 
         const skip = (page - 1) * pageSize;
         const orders = await Order.find({ user: context.user._id })
-          .sort({ updatedAt: -1 })
+          .sort({ createdAt: -1 })
           .skip(skip)
-          .limit(pageSize);
+          .limit(pageSize) // Retrieve only the specified number of orders per page
+          .populate({
+            path: "products.productId",
+            model: "Product",
+          });
 
-        return orders;
+        const totalOrders = await Order.countDocuments({
+          user: context.user._id,
+        });
+
+        return { orders, totalOrders };
       } catch (error) {
         if (error instanceof AuthenticationError) {
           throw error;
@@ -148,22 +156,6 @@ const orderResolvers = {
 
         // Wait for all product updates after order creation to complete
         await Promise.all(productUpdatesAfterOrder);
-
-        // Since Orders will be created using items in the cart, once an order is made, we can clear the cart
-        // Delete the user's cart
-        const user = await User.findById(context.user._id);
-        const cartId = user.cart;
-        await Cart.findByIdAndDelete(cartId);
-
-        // Create a new cart with initial values
-        const cart = await Cart.create({
-          user: context.user._id,
-          products: [],
-          totalPrice: 0,
-        });
-
-        // Update the user's cart reference
-        await User.findByIdAndUpdate(context.user._id, { cart: cart._id });
 
         return order;
       } catch (error) {
