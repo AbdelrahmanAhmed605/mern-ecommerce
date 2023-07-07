@@ -469,6 +469,13 @@ const Checkout = () => {
             <Form form={form} onFinish={handleCardPayment}>
               <Row gutter={24}>
                 <Col span={24}>
+                  {/* Checkbox to set fields and disable */}
+                  <Form.Item>
+                    <Checkbox onChange={handleCheckboxChange}>
+                      Same as Shipping Address
+                    </Checkbox>
+                  </Form.Item>
+
                   <Form.Item name="address" label="Billing Address">
                     <Input disabled={sameAsShipping} />
                   </Form.Item>
@@ -489,13 +496,6 @@ const Checkout = () => {
                   </Form.Item>
                 </Col>
               </Row>
-
-              {/* Checkbox to set fields and disable */}
-              <Form.Item>
-                <Checkbox onChange={handleCheckboxChange}>
-                  Same as Shipping Information
-                </Checkbox>
-              </Form.Item>
 
               <Col span={12}>
                 <Form.Item name="cardName" label="Name on Card">
