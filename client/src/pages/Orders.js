@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Spin,
   Result,
@@ -13,7 +13,6 @@ import {
   Pagination,
   Tag,
 } from "antd";
-import { ShoppingCartOutlined } from "@ant-design/icons";
 import { GET_ORDERS_BY_USER } from "../utils/queries";
 import formatDateTime from "../utils/helper";
 import AuthService from "../utils/auth";
@@ -21,7 +20,6 @@ import AuthService from "../utils/auth";
 const { Title, Text } = Typography;
 
 const Orders = () => {
-  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1); // State variable to keep track of the current page
   const ordersPerPage = 4;
 
@@ -30,7 +28,7 @@ const Orders = () => {
     loading: ordersLoading,
     data: ordersData,
     error: ordersError,
-    refetch,
+    refetch: refetchOrders,
   } = useQuery(GET_ORDERS_BY_USER, {
     variables: {
       page: currentPage, // Use the currentPage state variable as the initial page value
@@ -38,13 +36,17 @@ const Orders = () => {
     },
   });
 
+  useEffect(() => {
+    refetchOrders();
+  }, [ordersData, refetchOrders]);
+
   // Extract the order object from the fetched data, or initialize an empty array if it doesn't exist
   const orders = ordersData?.ordersByUser?.orders || [];
   const totalOrders = ordersData?.ordersByUser?.totalOrders || 0;
 
   const handlePageChange = (page, pageSize) => {
     setCurrentPage(page); // Update the currentPage state variable
-    refetch({ page, pageSize });
+    refetchOrders({ page, pageSize });
   };
 
   // Define colors for different order statuses
@@ -89,7 +91,7 @@ const Orders = () => {
               <Row gutter={[16, 16]} justify="center">
                 {orders.map((order) => (
                   <Col key={order._id} xs={24} sm={12} md={8} lg={6}>
-                    <Link to={`/confirmation/${order._id}`} target="_blank">
+                    <Link to={`/confirmation/${order._id}`}>
                       <Card
                         style={{
                           borderRadius: "8px",
