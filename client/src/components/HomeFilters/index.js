@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, Checkbox, InputNumber, Button, Dropdown } from "antd";
+import { Menu, Checkbox, InputNumber, Button, Dropdown, Row, Col } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import "./index.css";
 
@@ -20,7 +20,16 @@ const FilterOptions = ({
   setMinRating,
   setMaxRating,
   handleSortMenuClick,
+  handleResetAll,
 }) => {
+  // Check if any filter options are selected
+  const isFilterSelected =
+    selectedCategories.length > 0 ||
+    minPrice !== undefined ||
+    maxPrice !== undefined ||
+    minRating !== undefined ||
+    maxRating !== undefined;
+
   const [categoryMenuVisible, setCategoryMenuVisible] = useState(false); // Controls category dropdown element visibility
   const [priceMenuVisible, setPriceMenuVisible] = useState(false); // Controls price dropdown element visibility
   const [ratingMenuVisible, setRatingMenuVisible] = useState(false); // Controls rating dropdown element visibility
@@ -147,50 +156,71 @@ const FilterOptions = ({
   );
 
   return (
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
-      <div style={{ display: "flex" }}>
-        {/* Category Filter */}
-        <Dropdown
-          overlay={categoryMenu}
-          visible={categoryMenuVisible}
-          onVisibleChange={handleCategoryMenuVisibleChange}
-        >
-          <Button size="large" style={{ marginRight: 8 }}>
-            Categories <DownOutlined />
-          </Button>
-        </Dropdown>
+    <Row justify="space-between">
+      <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+        <Row gutter={8}>
+          {/* Category Filter */}
+          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
+            <Dropdown
+              overlay={categoryMenu}
+              visible={categoryMenuVisible}
+              onVisibleChange={handleCategoryMenuVisibleChange}
+            >
+              <Button size="large" style={{ width: "100%" }}>
+                Categories <DownOutlined />
+              </Button>
+            </Dropdown>
+          </Col>
 
-        {/* Price Filter */}
-        <Dropdown
-          overlay={priceMenu}
-          visible={priceMenuVisible}
-          onVisibleChange={handlePriceMenuVisibleChange}
-        >
-          <Button size="large" style={{ marginRight: 8 }}>
-            Price <DownOutlined />
-          </Button>
-        </Dropdown>
+          {/* Price Filter */}
+          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
+            <Dropdown
+              overlay={priceMenu}
+              visible={priceMenuVisible}
+              onVisibleChange={handlePriceMenuVisibleChange}
+            >
+              <Button size="large" style={{ width: "100%" }}>
+                Price <DownOutlined />
+              </Button>
+            </Dropdown>
+          </Col>
 
-        {/* Rating Filter */}
-        <Dropdown
-          overlay={ratingMenu}
-          visible={ratingMenuVisible}
-          onVisibleChange={handleRatingMenuVisibleChange}
-        >
-          <Button size="large" style={{ marginRight: 8 }}>
-            Rating <DownOutlined />
-          </Button>
-        </Dropdown>
-      </div>
-      <div style={{ display: "flex" }}>
+          {/* Rating Filter */}
+          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
+            <Dropdown
+              overlay={ratingMenu}
+              visible={ratingMenuVisible}
+              onVisibleChange={handleRatingMenuVisibleChange}
+            >
+              <Button size="large" style={{ width: "100%" }}>
+                Rating <DownOutlined />
+              </Button>
+            </Dropdown>
+          </Col>
+
+          {/* Reset All Filters */}
+          <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+            <Button
+              size="large"
+              onClick={handleResetAll}
+              disabled={!isFilterSelected}
+              style={{ width: "100%", marginTop: 8 }}
+            >
+              Reset All Filters
+            </Button>
+          </Col>
+        </Row>
+      </Col>
+
+      <Col xs={24} sm={24} md={12} lg={6} xl={6}>
         {/* Sort By */}
         <Dropdown overlay={sortMenu}>
-          <Button size="large">
+          <Button size="large" style={{ width: "100%" }}>
             Sort <DownOutlined />
           </Button>
         </Dropdown>
-      </div>
-    </div>
+      </Col>
+    </Row>
   );
 };
 

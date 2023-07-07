@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
+import { ShoppingOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import {
   GET_FILTERED_PRODUCTS,
@@ -10,6 +11,7 @@ import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import UserForm from "../components/UserForm";
 import FilterOptions from "../components/HomeFilters";
+import { useSignUpAndLoginStore } from "../store/userStore";
 
 import {
   Row,
@@ -31,9 +33,15 @@ const Home = () => {
   const [minRating, setMinRating] = useState(undefined); // Stores minimum rating value
   const [maxRating, setMaxRating] = useState(undefined); // Stores maximum rating value
   const [sortOption, setSortOption] = useState(undefined); // Stores selected sort option
-  const [isUserFormVisible, setIsUserFormVisible] = useState(false); // Controls login/sign up form visibility
   const [page, setPage] = useState(1); // Current page number
   const [pageSize, setPageSize] = useState(10); // Number of products per page
+
+  const userFormVisibility = useSignUpAndLoginStore(
+    (state) => state.userFormVisibility
+  );
+  const setUserFormVisibility = useSignUpAndLoginStore(
+    (state) => state.setUserFormVisibility
+  );
 
   // Query for fetching all categories id's and name
   const {
@@ -96,14 +104,14 @@ const Home = () => {
   const handleAddToCart = async (productId) => {
     // Check if the user is currently logged in
     if (!AuthService.loggedIn()) {
-      setIsUserFormVisible(true); // Display the user form or login/signup modal if user is not logged in
+      setUserFormVisibility(true); // Display the user form or login/signup modal if user is not logged in
 
       // Repeatedly check if the user is logged in and only continue with the function once the login is successful
       await new Promise((resolve) => {
         const checkUserInterval = setInterval(() => {
           if (AuthService.loggedIn()) {
             clearInterval(checkUserInterval); // Stop checking the login status
-            setIsUserFormVisible(false); // Hide the user form or login/signup modal
+            setUserFormVisibility(false); // Hide the user form or login/signup modal
             resolve(); // Fulfill the promise and resume execution
           }
         }, 500); // Check every 500 milliseconds if the user is logged in
@@ -173,10 +181,17 @@ const Home = () => {
     setMinRating(undefined);
     setMaxRating(undefined);
   };
+  const handleResetAll = () => {
+    setSelectedCategories([]);
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setMinRating(undefined);
+    setMaxRating(undefined);
+  }
 
   // Array containing the products that will be presented on the page after applying filters
   const displayedProducts = filteredProdData?.filteredProducts?.products || [];
-  const totalProducts = filteredProdData?.filteredProducts?.numProducts || 0;
+  const totalProducts = filteredProdData?.filteredProducts?.totalProducts || 0;
 
   // Rendered component
   return (
@@ -215,6 +230,7 @@ const Home = () => {
           setMaxRating={setMaxRating}
           sortOption={sortOption}
           handleSortMenuClick={handleSortMenuClick}
+          handleResetAll = {handleResetAll}
         />
       </div>
 
@@ -277,7 +293,8 @@ const Home = () => {
               <Button
                 type="primary"
                 shape="round"
-                size="small"
+                size="large"
+                icon={<ShoppingOutlined />}
                 onClick={() => handleAddToCart(product._id)}
                 style={{ width: "100%" }}
               >
@@ -296,8 +313,8 @@ const Home = () => {
       />
       <Modal
         title="Login"
-        visible={isUserFormVisible}
-        onCancel={() => setIsUserFormVisible(false)}
+        visible={userFormVisibility}
+        onCancel={() => setUserFormVisibility(false)}
         footer={null}
       >
         <UserForm />
