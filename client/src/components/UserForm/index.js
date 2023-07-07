@@ -3,10 +3,10 @@ import { useMutation } from "@apollo/client";
 import { CREATE_USER, LOGIN_USER } from "../../utils/mutations";
 import { Form, Input, Button, Row, Col, message } from "antd";
 import AuthService from "../../utils/auth";
-import useUserStore from "../../store/userStore";
+import { useLoginStatusStore } from "../../store/userStore";
 
 const UserForm = () => {
-  const setUserLoggedIn = useUserStore((state) => state.setIsLoggedIn);
+  const setUserLoggedIn = useLoginStatusStore((state) => state.setIsLoggedIn);
 
   // mutation to create a new user
   const [createUser, { loading: signupLoading }] = useMutation(CREATE_USER);
@@ -66,7 +66,10 @@ const UserForm = () => {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: "Please enter your email address" },
+                {
+                  required: true,
+                  message: "Please enter your email address",
+                },
                 {
                   type: "email",
                   message: "Please enter a valid email address",
