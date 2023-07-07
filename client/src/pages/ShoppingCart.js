@@ -155,6 +155,24 @@ const ShoppingCart = () => {
           style={{ marginTop: "8px" }}
         />
       )}
+      {updateProductQuantityError && (
+        <Alert
+          message="Error"
+          description="Failed to update the quantity of the product. Please try again later."
+          type="error"
+          showIcon
+          style={{ marginTop: "8px" }}
+        />
+      )}
+      {removeProductError && (
+        <Alert
+          message="Error"
+          description="Failed to remove the product. Please try again later."
+          type="error"
+          showIcon
+          style={{ marginTop: "8px" }}
+        />
+      )}
       {cart && (
         // Create a table with the cart's data source and display the data as rendered in the "columns" variable
         <Table
@@ -169,15 +187,7 @@ const ShoppingCart = () => {
           loading={updateProductQuantityLoading} // Display a loading state when updating the quantity of a product
         />
       )}
-      {updateProductQuantityError && (
-        <Alert
-          message="Error"
-          description="Failed to update the quantity of the product. Please try again later."
-          type="error"
-          showIcon
-          style={{ marginTop: "8px" }}
-        />
-      )}
+
       <div style={{ marginTop: "20px" }}>
         {cart && cart.products ? (
           <h3>Total Cart Price: ${cart.totalPrice}</h3>
