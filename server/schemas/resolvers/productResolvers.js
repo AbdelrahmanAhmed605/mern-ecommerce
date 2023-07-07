@@ -110,9 +110,9 @@ const productResolvers = {
           sortCriteria = { price: -1, createdAt: -1 };
         } else if (sortOption === "priceLowToHigh") {
           sortCriteria = { price: 1, createdAt: -1 };
-        } else if (sortOption === "reviewLowToHigh") {
+        } else if (sortOption === "ratingLowToHigh") {
           sortCriteria = { averageRating: 1, createdAt: -1 };
-        } else if (sortOption === "reviewHighToLow") {
+        } else if (sortOption === "ratingHighToLow") {
           sortCriteria = { averageRating: -1, createdAt: -1 };
         }
 
