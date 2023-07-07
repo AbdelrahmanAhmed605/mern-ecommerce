@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
+import { useNavigate } from "react-router-dom";
+
 import {
   Row,
   Col,
@@ -14,6 +15,7 @@ import {
   Alert,
   Spin,
 } from "antd";
+
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -21,6 +23,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+
 import { GET_CART } from "../utils/queries";
 import {
   CREATE_ORDER,
@@ -29,8 +32,10 @@ import {
 } from "../utils/mutations";
 import AuthService from "../utils/auth";
 
+// Create collapsible panels which for content sections to expand and collapse as needed.
 const { Panel } = Collapse;
 
+// Load the Stripe library in the background to ensure it is available before rendering the Stripe-related components, such as Elements and CardElement.
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 const Checkout = () => {
@@ -74,8 +79,7 @@ const Checkout = () => {
   ] = useMutation(REMOVE_PROD_FROM_CART);
 
   // mutation to reset the user's shopping cart and remove all products after they have completed their purchase
-  const [resetCart, { loading: resetCartLoading, error: resetCartError }] =
-    useMutation(RESET_CART);
+  const [resetCart] = useMutation(RESET_CART);
 
   // Calculate delivery cost based on order value
   const deliveryCost = cart.totalPrice > 100 ? 0 : 10;
@@ -178,7 +182,7 @@ const Checkout = () => {
       const { client_secret } = await response.json();
 
       // Process the payment using Stripe API
-      const { error: paymentError, paymentIntent } =
+      const { error: paymentError } =
         await stripe.confirmCardPayment(client_secret, {
           payment_method: {
             card: elements.getElement(CardElement),
@@ -326,9 +330,20 @@ const Checkout = () => {
                         type="primary"
                         onClick={() => handleRemoveProduct(item.product._id)}
                         danger
+                        loading={removeProductLoading}
+                        disabled={removeProductLoading || removeProductError}
                       >
                         Remove Product
                       </Button>
+                      {removeProductError && (
+                        <Alert
+                          message="Error"
+                          description="Failed to remove product from cart. Please try again later."
+                          type="error"
+                          showIcon
+                          style={{ marginTop: "8px" }}
+                        />
+                      )}
                     </div>
                   ))}
               </div>
@@ -510,10 +525,20 @@ const Checkout = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={!stripe || !elements}
+                disabled={!stripe || !elements || loading}
+                loading={orderLoading}
               >
-                Pay
+                {orderLoading ? "Processing" : "Pay"}
               </Button>
+              {orderError && (
+                <Alert
+                  message="Error"
+                  description="Failed to create order. Please try again later."
+                  type="error"
+                  showIcon
+                  style={{ marginTop: "8px" }}
+                />
+              )}
             </Form>
           </Panel>
         </Collapse>
