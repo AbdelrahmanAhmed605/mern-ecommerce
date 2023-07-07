@@ -99,22 +99,25 @@ export const GET_FILTERED_PRODUCTS = gql`
           _id
         }
       }
-      numProducts
+      totalProducts
     }
   }
 `;
 
 export const GET_PRODUCTS_BY_SEARCH = gql`
-  query SearchProducts($searchTerm: String!) {
-    searchProducts(searchTerm: $searchTerm) {
-      _id
-      title
-      price
-      image
-      averageRating
-      reviews {
+  query SearchProducts($searchTerm: String!, $page: Int, $pageSize: Int) {
+    searchProducts(searchTerm: $searchTerm, page: $page, pageSize: $pageSize) {
+      products {
         _id
+        title
+        price
+        image
+        averageRating
+        reviews {
+          _id
+        }
       }
+      totalProducts
     }
   }
 `;
