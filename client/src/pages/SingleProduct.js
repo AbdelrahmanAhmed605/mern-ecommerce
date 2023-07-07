@@ -44,6 +44,7 @@ const SingleProduct = () => {
   const {
     loading: productLoading,
     data: productData,
+    error: productError,
     refetch: refetchProduct,
   } = useQuery(GET_SINGLE_PRODUCT, {
     variables: {
@@ -116,6 +117,17 @@ const SingleProduct = () => {
 
   if (productLoading) {
     return <Spin size="large" />;
+  }
+
+  if (productError) {
+    return (
+      <Alert
+        message="Error"
+        description="Failed to fetch the product. Please try again later."
+        type="error"
+        showIcon
+      />
+    );
   }
 
   return (
