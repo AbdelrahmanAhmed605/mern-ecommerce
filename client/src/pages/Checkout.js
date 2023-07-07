@@ -56,7 +56,11 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   // Query to get the cart data
-  const { loading: cartLoading, data: cartData } = useQuery(GET_CART);
+  const {
+    loading: cartLoading,
+    data: cartData,
+    error: cartError,
+  } = useQuery(GET_CART);
   const cart = cartData?.cart || [];
 
   // Form instance for handling form operations
@@ -285,6 +289,16 @@ const Checkout = () => {
                 <Spin spinning={true} size="large" />
                 <p>Loading cart...</p>
               </div>
+            )}
+
+            {cartError && (
+              <Alert
+                message="Error"
+                description="Failed to load the cart. Please try again later."
+                type="error"
+                showIcon
+                style={{ marginTop: "8px" }}
+              />
             )}
 
             {cart && cart.products && cart.products.length === 0 ? (
