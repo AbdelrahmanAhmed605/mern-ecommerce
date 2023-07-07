@@ -1,9 +1,14 @@
-// userStore.js
-import {create} from "zustand";
+import { create } from "zustand";
+import AuthService from "../utils/auth";
 
-const useUserStore = create((set) => ({
-  isLoggedIn: false,
+const useLoginStatusStore = create((set) => ({
+  isLoggedIn: AuthService.loggedIn(),
   setIsLoggedIn: (value) => set(() => ({ isLoggedIn: value })),
 }));
 
-export default useUserStore;
+const useSignUpAndLoginStore = create((set) => ({
+  userFormVisibility: false,
+  setUserFormVisibility: (value) => set(() => ({ userFormVisibility: value })),
+}));
+
+export { useSignUpAndLoginStore, useLoginStatusStore };
