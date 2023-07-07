@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
+
 import {
   List,
   Rate,
@@ -10,8 +11,11 @@ import {
   message,
   Divider,
   Pagination,
+  Alert,
+  Spin,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+
 import {
   GET_REVIEWS_FOR_PRODUCT,
   GET_USER_PRODUCT_REVIEW,
@@ -21,8 +25,9 @@ import {
   UPDATE_REVIEW,
   DELETE_REVIEW,
 } from "../../utils/mutations";
-import formatDateTime from "../../utils/helper";
 import AuthService from "../../utils/auth";
+import formatDateTime from "../../utils/helper";
+
 import { useLoginStatusStore } from "../../store/userStore";
 
 const { TextArea } = Input;
@@ -34,7 +39,6 @@ const ProductReviews = ({ productId, refetchProduct }) => {
   const [editMode, setEditMode] = useState(false); // Enable/disable edit mode
   const [updatedRating, setUpdatedRating] = useState(0); // Store the updated rating
   const [updatedComment, setUpdatedComment] = useState(""); // Store the updated comment
-  const [submitting, setSubmitting] = useState(false); // Track if the review is being submitted
 
   // Determines number of reviews shown per one pagination section/page
   const reviewsPerPage = 5;
@@ -117,7 +121,6 @@ const ProductReviews = ({ productId, refetchProduct }) => {
     }
 
     try {
-      setSubmitting(true);
       await createReview({
         variables: {
           productId: productId,
@@ -140,9 +143,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
         console.error("Error posting review:", error);
         message.error("Failed to submit review");
       }
-    } finally {
-      setSubmitting(false);
-    }
+    } 
   };
 
   const handleUpdateReview = async (values) => {
@@ -261,7 +262,11 @@ const ProductReviews = ({ productId, refetchProduct }) => {
                           onChange={(e) => setUpdatedComment(e.target.value)}
                         />
                       </Form.Item>
-                      <Button type="primary" htmlType="submit">
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={updateReviewLoading}
+                      >
                         Resubmit Review
                       </Button>
                       <Button type="link" onClick={() => setEditMode(false)}>
@@ -288,10 +293,20 @@ const ProductReviews = ({ productId, refetchProduct }) => {
                           type="link"
                           icon={<DeleteOutlined />}
                           onClick={handleDeleteReview}
+                          loading={deleteReviewLoading}
                         >
                           Delete Review
                         </Button>
                       </div>
+                      {deleteReviewError && (
+                        <Alert
+                          message="Error"
+                          description="Failed to delete the review. Please try again later."
+                          type="error"
+                          showIcon
+                          style={{ marginBottom: "16px" }}
+                        />
+                      )}
                     </>
                   )}
                 </div>
@@ -328,7 +343,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
                 <Button
                   type="primary"
                   htmlType="submit"
-                  loading={submitting}
+                  loading={createReviewLoading}
                   className="submit-button"
                 >
                   Submit Review
@@ -342,12 +357,36 @@ const ProductReviews = ({ productId, refetchProduct }) => {
                   : "Failed to submit review"}
               </div>
             )}
+            {updateReviewError && (
+              <Alert
+                message="Error"
+                description="Failed to update your review. Please try again later."
+                type="error"
+                showIcon
+                style={{ marginBottom: "16px" }}
+              />
+            )}
           </>
         )}
       </div>
       <Divider />
       <div>
         <h3>Product Reviews</h3>
+        {userReviewsError && (
+          <Alert
+            message="Error"
+            description="Failed to fetch product reviews. Please try again later."
+            type="error"
+            showIcon
+            style={{ marginBottom: "16px" }}
+          />
+        )}
+        {userReviewLoading && (
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <Spin spinning={true} size="large" />
+            <p>Loading reviews...</p>
+          </div>
+        )}
         {reviews.length > 0 ? (
           // Display reviews if available
           <>
