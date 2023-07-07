@@ -23,13 +23,13 @@ import {
 } from "../../utils/mutations";
 import formatDateTime from "../../utils/helper";
 import AuthService from "../../utils/auth";
-import useUserStore from "../../store/userStore";
+import { useLoginStatusStore } from "../../store/userStore";
 
 const { TextArea } = Input;
 
 const ProductReviews = ({ productId, refetchProduct }) => {
   // State variables
-  const isLoggedIn = useUserStore((state) => state.isLoggedIn); // checks if the user is logged in
+  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn); // checks if the user is logged in
   const [currentPage, setCurrentPage] = useState(1); // Keep track of the current page for pagination
   const [editMode, setEditMode] = useState(false); // Enable/disable edit mode
   const [updatedRating, setUpdatedRating] = useState(0); // Store the updated rating
