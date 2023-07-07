@@ -1,18 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import { useMutation } from "@apollo/client";
+
+import { Form, Input, Button, Row, Col, message, Alert } from "antd";
+
 import { CREATE_USER, LOGIN_USER } from "../../utils/mutations";
-import { Form, Input, Button, Row, Col, message } from "antd";
 import AuthService from "../../utils/auth";
+
 import { useLoginStatusStore } from "../../store/userStore";
 
 const UserForm = () => {
+  // Store to check the user's current logged in status
   const setUserLoggedIn = useLoginStatusStore((state) => state.setIsLoggedIn);
 
   // mutation to create a new user
-  const [createUser, { loading: signupLoading }] = useMutation(CREATE_USER);
+  const [createUser, { loading: signupLoading, error: signupError }] = useMutation(CREATE_USER);
 
-  // mutation to add a product into the shopping cart
-  const [loginUser, { loading: loginLoading }] = useMutation(LOGIN_USER);
+  // mutation to allow the user to login
+  const [loginUser, { loading: loginLoading, error: loginError }] = useMutation(LOGIN_USER);
 
   const handleSignUpForm = async (values) => {
     values.role = "user";
@@ -105,6 +109,16 @@ const UserForm = () => {
                 Sign Up
               </Button>
             </Form.Item>
+            {/* Display signupError message */}
+            {signupError && (
+              <Alert
+                message="Error"
+                description="Failed to sign up. Please try again later."
+                type="error"
+                showIcon
+                style={{ marginBottom: "16px" }}
+              />
+            )}
           </Form>
         </div>
       </Col>
@@ -145,6 +159,16 @@ const UserForm = () => {
                 Log In
               </Button>
             </Form.Item>
+            {/* Display loginError message */}
+            {loginError && (
+              <Alert
+                message="Error"
+                description="Failed to log in. Please check your credentials and try again."
+                type="error"
+                showIcon
+                style={{ marginBottom: "16px" }}
+              />
+            )}
           </Form>
         </div>
       </Col>
