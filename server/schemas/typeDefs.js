@@ -32,9 +32,9 @@ const typeDefs = gql`
     updatedAt: String!
   }
 
-  type FilteredProducts {
+  type productPagination {
     products: [Product!]!
-    numProducts: Int!
+    totalProducts: Int!
   }
 
   type Category {
@@ -117,8 +117,12 @@ const typeDefs = gql`
       sortOption: String
       page: Int
       pageSize: Int
-    ): FilteredProducts!
-    searchProducts(searchTerm: String!): [Product!]!
+    ): productPagination!
+    searchProducts(
+      searchTerm: String!
+      page: Int
+      pageSize: Int
+    ): productPagination!
     productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
 
     categories: [Category!]!

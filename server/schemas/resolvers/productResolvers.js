@@ -122,12 +122,11 @@ const productResolvers = {
           .limit(pageSize)
           .populate("categories")
           .populate("user");
-        
-        const [products, numProducts] = await Promise.all([
+
+        const [products, totalProducts] = await Promise.all([
           productsQuery.exec(),
           Product.countDocuments(filter), // returns the number of documents obtained from the filtered results
         ]);
-
 
         if (!products) {
           throw new UserInputError(
@@ -137,7 +136,7 @@ const productResolvers = {
 
         return {
           products,
-          numProducts,
+          totalProducts,
         };
       } catch (error) {
         if (error instanceof UserInputError) {
@@ -150,13 +149,23 @@ const productResolvers = {
 
     // Resolver for searching products based on a search term
     // - searchTerm: the term to search for in the product titles
-    searchProducts: async (parent, { searchTerm }) => {
+    searchProducts: async (parent, { searchTerm, page = 1, pageSize = 10 }) => {
       try {
         const regex = new RegExp(searchTerm, "i"); // Case-insensitive regex pattern
-        const products = await Product.find({ title: { $regex: regex } })
+        const skip = (page - 1) * pageSize; // Calculate skip value for pagination
+
+        const productsQuery = await Product.find({ title: { $regex: regex } })
+          .skip(skip)
+          .limit(pageSize)
           .populate("categories")
           .populate("user");
-        return products;
+
+        const [products, totalProducts] = await Promise.all([
+          productsQuery,
+          Product.countDocuments({ title: { $regex: regex } }), // returns the number of documents obtained from the search results
+        ]);
+
+        return { products, totalProducts };
       } catch (error) {
         throw new Error("Failed to search products");
       }
