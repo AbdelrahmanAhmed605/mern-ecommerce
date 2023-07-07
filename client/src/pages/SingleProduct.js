@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
+import { useParams } from "react-router-dom";
+
 import {
   Row,
   Col,
@@ -10,28 +11,36 @@ import {
   Divider,
   message,
   Modal,
+  Spin,
+  Alert,
 } from "antd";
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  MinusOutlined,
+  PlusOutlined,
+  ShoppingOutlined,
+} from "@ant-design/icons";
 
 import { GET_SINGLE_PRODUCT, GET_ME } from "../utils/queries";
 import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
+
 import UserForm from "../components/UserForm";
 import ProductReviews from "../components/productReviews";
 import { useSignUpAndLoginStore } from "../store/userStore";
-import { ShoppingOutlined } from "@ant-design/icons";
-
 
 const SingleProduct = () => {
-  const { productId } = useParams();
-  const [prodQuantity, setProdQuantity] = useState(1);
+  const { productId } = useParams(); // Retrieves the productId from the URL parameters
+  const [prodQuantity, setProdQuantity] = useState(1); // Manages the quantity of the product with a default value of 1
+  // Retrieves the user form visibility state from the userStore
   const userFormVisibility = useSignUpAndLoginStore(
     (state) => state.userFormVisibility
   );
+  // Retrieves the function to set the user form visibility state from the userStore
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
 
+  // Query to get the product data
   const {
     loading: productLoading,
     data: productData,
@@ -44,14 +53,10 @@ const SingleProduct = () => {
   const product = productData?.product || {};
 
   // Lazy Query for fetching the currently logged in user
-  const [
-    fetchCurrentUser,
-    { loading: currentUserLoading, data: currentUserData },
-  ] = useLazyQuery(GET_ME);
+  const [fetchCurrentUser] = useLazyQuery(GET_ME);
 
   // mutation to create a shopping cart
-  const [createCart, { loading: cartLoading, error: cartError }] =
-    useMutation(CREATE_CART);
+  const [createCart] = useMutation(CREATE_CART);
 
   // mutation to add a product into the shopping cart
   const [
@@ -59,6 +64,7 @@ const SingleProduct = () => {
     { loading: addProdToCartLoad, error: addProdToCartError },
   ] = useMutation(ADD_PROD_TO_CART);
 
+  // Handles the user changing the quantity of the product they want to add
   const handleQuantityChange = (value) => {
     setProdQuantity(value);
   };
@@ -109,7 +115,7 @@ const SingleProduct = () => {
   };
 
   if (productLoading) {
-    return <div>Loading...</div>;
+    return <Spin size="large" />;
   }
 
   return (
@@ -215,9 +221,21 @@ const SingleProduct = () => {
               icon={<ShoppingOutlined />}
               onClick={handleAddToCart}
               style={{ width: "100%", fontSize: "20px" }}
+              loading={addProdToCartLoad}
+              disabled={addProdToCartLoad || addProdToCartError}
             >
               Add to Cart
             </Button>
+            {addProdToCartError && (
+              <div style={{ marginTop: "8px" }}>
+                <Alert
+                  message="Error"
+                  description="Failed to add product to cart. Please try again later."
+                  type="error"
+                  showIcon
+                />
+              </div>
+            )}
           </div>
         </Col>
       </Row>
