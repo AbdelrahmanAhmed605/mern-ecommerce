@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { Link, useNavigate } from "react-router-dom";
-import { GET_CATEGORIES, GET_CART } from "../../utils/queries";
-import {
-  UPDATE_CART_PROD_QUANTITY,
-  REMOVE_PROD_FROM_CART,
-} from "../../utils/mutations";
-import UserForm from "../UserForm";
-import AuthService from "../../utils/auth";
-import {
-  useLoginStatusStore,
-  useSignUpAndLoginStore,
-} from "../../store/userStore";
+
 import {
   Menu,
   Input,
@@ -21,6 +11,8 @@ import {
   Row,
   Col,
   InputNumber,
+  Alert,
+  Spin,
 } from "antd";
 import {
   UserOutlined,
@@ -30,34 +22,43 @@ import {
   LogoutOutlined,
   MinusOutlined,
   PlusOutlined,
-  CloseOutlined,
 } from "@ant-design/icons";
+
+import { GET_CART } from "../../utils/queries";
+import {
+  UPDATE_CART_PROD_QUANTITY,
+  REMOVE_PROD_FROM_CART,
+} from "../../utils/mutations";
+import AuthService from "../../utils/auth";
+
+import UserForm from "../UserForm";
+import {
+  useLoginStatusStore,
+  useSignUpAndLoginStore,
+} from "../../store/userStore";
+
 const { Search } = Input;
 
 const Navbar = () => {
   const navigate = useNavigate();
-  // State for showing/hiding the shopping cart
-  const [cartVisible, setCartVisible] = useState(false);
   // State for checking the user's screen size
   const [windowSize, setWindowSize] = useState(window.innerWidth);
-  // State for showing/hiding the user form (login/signup modal)
-  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn); // checks if the user is logged in
+  // store for checking the users logged in status
+  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn);
+  // store for checking the visibility of the sign up/login modal
   const userFormVisibility = useSignUpAndLoginStore(
     (state) => state.userFormVisibility
   );
+  // store for setting the visiblity of the sign up/login modal
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
-
-  // Query to get categories data
-  const { loading: categoriesLoading, data: categoriesData } =
-    useQuery(GET_CATEGORIES);
-  const categories = categoriesData?.categories || [];
 
   // Query to get shopping cart data
   const {
     loading: cartLoading,
     data: cartData,
+    error: cartError,
     refetch: cartRefetch,
   } = useQuery(GET_CART);
   const cart = cartData?.cart || [];
@@ -65,7 +66,7 @@ const Navbar = () => {
   // mutation to change the quanitity of a product in the shopping cart
   const [
     updateProdQuantity,
-    { loading: prodQuantityLoading, error: prodQuantityError },
+    {error: prodQuantityError },
   ] = useMutation(UPDATE_CART_PROD_QUANTITY);
 
   // mutation to remove a product in the shopping cart
@@ -83,7 +84,7 @@ const Navbar = () => {
     if (isLoggedIn) {
       cartRefetch();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, cartRefetch]);
 
   useEffect(() => {
     // Function to handle window resize event
@@ -138,42 +139,6 @@ const Navbar = () => {
     });
   };
 
-  // Turns on the visibility of the cart dropdown to allow the user to see it
-  const handleCartDropdownOpen = () => {
-    if (windowSize >= 768) {
-      setCartVisible(true);
-    }
-  };
-  // Turns off the visibility of the cart dropdown to hide it from the user
-  const handleCartDropdownClose = () => {
-    if (windowSize >= 768) {
-      setCartVisible(false);
-    }
-  };
-
-  // Menu list displaying all categories
-  const categoriesMenu = (
-    <Menu>
-      {categories &&
-        categories.map((category) => (
-          // Each category item in the menu
-          <Menu.Item key={category.id}>
-            {/* Link to the category page */}
-            <Link
-              to={`/categories/${category.id}`}
-              style={{
-                color: "inherit",
-                textDecoration: "none",
-                fontSize: "16px",
-              }}
-            >
-              {category.name}
-            </Link>
-          </Menu.Item>
-        ))}
-    </Menu>
-  );
-
   // Menu options for user actions (e.g., account settings, user orders, logout)
   const userMenu = (
     <Menu>
@@ -206,7 +171,7 @@ const Navbar = () => {
 
   return (
     <div style={{ padding: "16px" }}>
-      <Row gutter={[16,16]} align="middle">
+      <Row gutter={[16, 16]} align="middle">
         <Col span={8}>
           <Link
             to="/"
@@ -262,10 +227,11 @@ const Navbar = () => {
             {/* Shopping cart icon and dropdown */}
             <Dropdown
               overlay={
-                // If the user is logged in, display the user's cart total amount, and cart products and their quantities
+                // Only allow the dropdown for larger screens as it covers a large portion of the screen for smaller devices which could distract users
                 windowSize >= 768 ? (
                   <>
                     {isLoggedIn ? (
+                      // If the user is logged in, display the user's cart total amount, and cart products and their quantities
                       <div
                         style={{
                           width: "400px",
@@ -276,10 +242,25 @@ const Navbar = () => {
                           maxHeight: "400px",
                           overflowY: "auto",
                         }}
-                        onMouseEnter={handleCartDropdownOpen}
-                        onMouseLeave={handleCartDropdownClose}
                       >
                         <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                          {cartLoading && (
+                            <div
+                              style={{ textAlign: "center", marginTop: "20px" }}
+                            >
+                              <Spin spinning={true} size="large" />
+                              <p>Loading your shopping cart...</p>
+                            </div>
+                          )}
+                          {cartError && (
+                            <Alert
+                              message="Error"
+                              description="Failed to fetch your shopping cart. Please try again later."
+                              type="error"
+                              showIcon
+                              style={{ marginBottom: "16px" }}
+                            />
+                          )}
                           {cart && cart.products && cart.products.length > 0 ? (
                             // Render each product in the cart
                             cart.products.map((item) => (
@@ -315,55 +296,73 @@ const Navbar = () => {
                                     {item.product.title}
                                   </p>
                                   {/* Product quantity and dropwdown to allow user to change quantity */}
-                                  <p style={{ marginBottom: "4px" }}>
+                                  <div style={{ marginBottom: "4px" }}>
                                     <span style={{ fontWeight: "bold" }}>
                                       Price: ${item.product.price}
                                     </span>{" "}
-                                    (Quantity:{" "}
-                                    <InputNumber
-                                      min={1}
-                                      value={item.quantity}
+                                    <div
                                       style={{
-                                        marginLeft: "8px",
-                                        marginRight: "8px",
-                                        fontSize: "18px",
+                                        display: "flex",
+                                        alignItems: "center",
                                       }}
-                                      formatter={(value) => `${value}`}
-                                      parser={(value) => parseInt(value)}
-                                      onChange={(value) =>
-                                        handleQuantityChange(
-                                          value,
-                                          item.product._id
-                                        )
-                                      }
-                                      addonBefore={
-                                        <Button
-                                          shape="circle"
-                                          icon={<MinusOutlined />}
-                                          onClick={() =>
-                                            handleQuantityChange(
-                                              item.quantity - 1,
-                                              item.product._id
-                                            )
-                                          }
-                                          disabled={item.quantity <= 1}
-                                        />
-                                      }
-                                      addonAfter={
-                                        <Button
-                                          shape="circle"
-                                          icon={<PlusOutlined />}
-                                          onClick={() =>
-                                            handleQuantityChange(
-                                              item.quantity + 1,
-                                              item.product._id
-                                            )
-                                          }
-                                        />
-                                      }
-                                    />
-                                    )
-                                  </p>
+                                    >
+                                      <span
+                                        style={{
+                                          marginRight: "8px",
+                                          fontWeight: "bold",
+                                        }}
+                                      >
+                                        Quantity:
+                                      </span>
+                                      <InputNumber
+                                        min={1}
+                                        value={item.quantity}
+                                        style={{ fontSize: "18px" }}
+                                        formatter={(value) => `${value}`}
+                                        parser={(value) => parseInt(value)}
+                                        onChange={(value) =>
+                                          handleQuantityChange(
+                                            value,
+                                            item.product._id
+                                          )
+                                        }
+                                        addonBefore={
+                                          <Button
+                                            shape="circle"
+                                            icon={<MinusOutlined />}
+                                            onClick={() =>
+                                              handleQuantityChange(
+                                                item.quantity - 1,
+                                                item.product._id
+                                              )
+                                            }
+                                            disabled={item.quantity <= 1}
+                                          />
+                                        }
+                                        addonAfter={
+                                          <Button
+                                            shape="circle"
+                                            icon={<PlusOutlined />}
+                                            onClick={() =>
+                                              handleQuantityChange(
+                                                item.quantity + 1,
+                                                item.product._id
+                                              )
+                                            }
+                                          />
+                                        }
+                                      />
+                                    </div>
+                                    {prodQuantityError && (
+                                      <Alert
+                                        message="Error"
+                                        description="Failed to update the quantity of the product. Please try again later."
+                                        type="error"
+                                        showIcon
+                                        style={{ marginBottom: "16px" }}
+                                      />
+                                    )}
+                                  </div>
                                   {/* Total price of the product including quantity of the product */}
                                   <p style={{ marginBottom: "4px" }}>
                                     Total: ${item.product.price * item.quantity}
@@ -376,9 +375,19 @@ const Navbar = () => {
                                       handleRemoveProduct(item.product._id)
                                     }
                                     danger
+                                    loading={removeProductLoading}
                                   >
                                     Remove Product
                                   </Button>
+                                  {removeProductError && (
+                                    <Alert
+                                      message="Error"
+                                      description="Failed to delete the review. Please try again later."
+                                      type="error"
+                                      showIcon
+                                      style={{ marginBottom: "16px" }}
+                                    />
+                                  )}
                                 </div>
                               </div>
                             ))
@@ -443,7 +452,6 @@ const Navbar = () => {
                           type="primary"
                           style={{ marginTop: "16px" }}
                           onClick={() => {
-                            setCartVisible(false);
                             handleUserForm();
                           }}
                         >
