@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_ME } from "../utils/queries";
-import {
-  UPDATE_USER,
-  DELETE_USER,
-  UPDATE_USER_PASSWORD,
-} from "../utils/mutations";
+
 import {
   Form,
   Input,
@@ -15,6 +10,7 @@ import {
   Divider,
   message,
   Spin,
+  Alert,
 } from "antd";
 import {
   UserOutlined,
@@ -23,28 +19,43 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+
+import { GET_ME } from "../utils/queries";
+import {
+  UPDATE_USER,
+  DELETE_USER,
+  UPDATE_USER_PASSWORD,
+} from "../utils/mutations";
 import AuthService from "../utils/auth";
+
 import { useLoginStatusStore } from "../store/userStore";
 
 const { Title } = Typography;
 
 const Profile = () => {
-  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn); // checks if the user is logged in
+  // Store state management that checks if the user is logged in
+  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn);
+
+  // State variables
   const [loading, setLoading] = useState(false);
   const [editUsername, setEditUsername] = useState(false);
   const [editEmail, setEditEmail] = useState(false);
   const [editPassword, setEditPassword] = useState(false);
 
+  // Query for fetching user data
   const {
-    loading: queryLoading,
-    error,
-    data,
+    loading: userLoading,
+    error: userError,
+    data: userData,
     refetch: refetchUser,
   } = useQuery(GET_ME);
+
+  // Mutations for updating user information
   const [updateUser] = useMutation(UPDATE_USER);
   const [deleteUser] = useMutation(DELETE_USER);
   const [updateUserPassword] = useMutation(UPDATE_USER_PASSWORD);
 
+  // Handle updating the users profile username to the new username inputted by the user
   const handleUpdateUsername = async (values) => {
     setLoading(true);
     try {
@@ -64,6 +75,7 @@ const Profile = () => {
     }
   };
 
+  // Handle updating the users profile email to the new email inputted by the user
   const handleUpdateEmail = async (values) => {
     setLoading(true);
     try {
@@ -84,6 +96,7 @@ const Profile = () => {
     }
   };
 
+  // Handle updating the users profile password to the new password inputted by the user
   const handleUpdatePassword = async (values) => {
     setLoading(true);
     try {
@@ -110,6 +123,7 @@ const Profile = () => {
     }
   };
 
+  // Handle deleting the user's account
   const handleDeleteUser = async () => {
     setLoading(true);
     try {
@@ -125,18 +139,19 @@ const Profile = () => {
       }
     } finally {
       setLoading(false);
+      // logs the user out and returns to the home page when they delete their account
       AuthService.logout();
     }
   };
 
-  // useEffect hook to refetch userReviewData when user logs in
+  // useEffect hook to refetch user data when user logs in
   useEffect(() => {
     if (isLoggedIn) {
       refetchUser();
     }
   }, [isLoggedIn, refetchUser]);
 
-  // Check if the user is accessing the page while logged out and display a message to inform them they must be logged in
+  // Check if the user is accessing the page while logged out
   if (!AuthService.loggedIn()) {
     return (
       <div style={{ textAlign: "center", fontSize: "18px", marginTop: "20px" }}>
@@ -146,15 +161,31 @@ const Profile = () => {
     );
   }
 
-  if (queryLoading) {
-    return <div>Loading...</div>;
+  // Display a loading spinner while user's data is being fetched
+  if (userLoading) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <Spin size="large" />
+        <p>Loading user data...</p>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div>Error occurred while fetching user data.</div>;
+  // Display an error message if an error occured while fetching the user's
+  if (userError) {
+    return (
+      <Alert
+        message="Error"
+        description="Failed to retrieve your information. Please try again later."
+        type="error"
+        showIcon
+        style={{ marginTop: "8px" }}
+      />
+    );
   }
 
-  const { me } = data;
+  // Destructure user data
+  const { me } = userData;
 
   return (
     <div>
@@ -309,7 +340,8 @@ const Profile = () => {
       <div style={{ textAlign: "center" }}>
         <Divider />
         <Button
-          type="danger"
+          type="primary"
+          danger
           loading={loading}
           icon={<DeleteOutlined />}
           onClick={handleDeleteUser}
