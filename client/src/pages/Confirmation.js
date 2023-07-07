@@ -1,6 +1,7 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client";
+import { useParams } from "react-router-dom";
+
 import {
   Spin,
   Result,
@@ -12,14 +13,13 @@ import {
   Divider,
 } from "antd";
 import {
-  UserOutlined,
   EnvironmentOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
 
 import { GET_ORDER } from "../utils/queries";
-import formatDateTime from "../utils/helper";
 import AuthService from "../utils/auth";
+import formatDateTime from "../utils/helper";
 
 const { Title, Text } = Typography;
 
