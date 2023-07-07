@@ -1,8 +1,10 @@
 import React from "react";
 import { useMutation, useQuery } from "@apollo/client";
-import { Button, InputNumber, Table, Space, Spin } from "antd";
 import { Link } from "react-router-dom";
+
+import { Button, InputNumber, Table, Space, Spin, Alert } from "antd";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+
 import {
   REMOVE_PROD_FROM_CART,
   UPDATE_CART_PROD_QUANTITY,
@@ -127,16 +129,14 @@ const ShoppingCart = () => {
           type="primary"
           danger
           onClick={() => handleRemoveProduct(record._id)}
+          loading={removeProductLoading} // Display a loading state when removing a product
+          disabled={removeProductLoading || removeProductError} // Disable the button if there's an ongoing request or error
         >
           Remove Product
         </Button>
       ),
     },
   ];
-
-  // Conditional rendering based on the cart loading state
-  if (cartLoading) return <p>Loading...</p>;
-  if (cartError) return <p>Error: {cartError.message}</p>;
 
   return (
     <>
@@ -145,6 +145,15 @@ const ShoppingCart = () => {
           <Spin spinning={true} size="large" />
           <p>Loading cart...</p>
         </div>
+      )}
+      {cartError && (
+        <Alert
+          message="Error"
+          description="Failed to load the cart. Please try again later."
+          type="error"
+          showIcon
+          style={{ marginTop: "8px" }}
+        />
       )}
       {cart && (
         // Create a table with the cart's data source and display the data as rendered in the "columns" variable
@@ -157,6 +166,16 @@ const ShoppingCart = () => {
           rowKey={(record) => record._id}
           pagination={false}
           scroll={{ x: true }} // Enable horizontal scrolling
+          loading={updateProductQuantityLoading} // Display a loading state when updating the quantity of a product
+        />
+      )}
+      {updateProductQuantityError && (
+        <Alert
+          message="Error"
+          description="Failed to update the quantity of the product. Please try again later."
+          type="error"
+          showIcon
+          style={{ marginTop: "8px" }}
         />
       )}
       <div style={{ marginTop: "20px" }}>
