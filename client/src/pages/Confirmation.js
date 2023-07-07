@@ -1,25 +1,16 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client";
+import { useParams } from "react-router-dom";
+
+import { Spin, Alert, Card, Row, Col, Typography, Avatar, Divider } from "antd";
 import {
-  Spin,
-  Result,
-  Card,
-  Row,
-  Col,
-  Typography,
-  Avatar,
-  Divider,
-} from "antd";
-import {
-  UserOutlined,
   EnvironmentOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
 
 import { GET_ORDER } from "../utils/queries";
-import formatDateTime from "../utils/helper";
 import AuthService from "../utils/auth";
+import formatDateTime from "../utils/helper";
 
 const { Title, Text } = Typography;
 
@@ -55,7 +46,15 @@ const Confirmation = () => {
 
   // If there's an error fetching the order details, display an error message
   if (orderError) {
-    return <Result status="error" title="Failed to fetch order details" />;
+    return (
+      <Alert
+        message="Error"
+        description="Failed to fetch order details. Please try again later."
+        type="error"
+        showIcon
+        style={{ marginTop: "8px" }}
+      />
+    );
   }
 
   // Extract the order object from the fetched data, or initialize an empty object if it doesn't exist

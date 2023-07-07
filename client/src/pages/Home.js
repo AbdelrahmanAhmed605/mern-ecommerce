@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
-import { ShoppingOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import {
-  GET_FILTERED_PRODUCTS,
-  GET_CATEGORIES,
-  GET_ME,
-} from "../utils/queries";
-import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
-import AuthService from "../utils/auth";
-import UserForm from "../components/UserForm";
-import FilterOptions from "../components/HomeFilters";
-import { useSignUpAndLoginStore } from "../store/userStore";
 
 import {
   Row,
@@ -22,7 +11,23 @@ import {
   Modal,
   message,
   Pagination,
+  Spin,
+  Alert,
 } from "antd";
+import { ShoppingOutlined } from "@ant-design/icons";
+
+import {
+  GET_FILTERED_PRODUCTS,
+  GET_CATEGORIES,
+  GET_ME,
+} from "../utils/queries";
+import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
+import AuthService from "../utils/auth";
+
+import UserForm from "../components/UserForm";
+import FilterOptions from "../components/HomeFilters";
+import { useSignUpAndLoginStore } from "../store/userStore";
+
 const { Title } = Typography;
 
 const Home = () => {
@@ -46,26 +51,26 @@ const Home = () => {
   // Query for fetching all categories id's and name
   const {
     loading: categoriesLoading,
+    error: categoriesError,
     data: categoriesData,
-    refetch: categoriesRefetch,
   } = useQuery(GET_CATEGORIES);
   const categories = categoriesData?.categories || [];
 
   // Lazy Query for fetching all products based off a set of optional input parameters
   const [
     fetchProductsByFilter,
-    { loading: filteredProdLoad, data: filteredProdData },
+    {
+      loading: filteredProdLoad,
+      data: filteredProdData,
+      error: filteredProdError,
+    },
   ] = useLazyQuery(GET_FILTERED_PRODUCTS);
 
   // Lazy Query for fetching the currently logged in user
-  const [
-    fetchCurrentUser,
-    { loading: currentUserLoading, data: currentUserData },
-  ] = useLazyQuery(GET_ME);
+  const [fetchCurrentUser] = useLazyQuery(GET_ME);
 
   // mutation to create a shopping cart
-  const [createCart, { loading: cartLoading, error: cartError }] =
-    useMutation(CREATE_CART);
+  const [createCart] = useMutation(CREATE_CART);
 
   // mutation to add a product into the shopping cart
   const [
@@ -187,7 +192,7 @@ const Home = () => {
     setMaxPrice(undefined);
     setMinRating(undefined);
     setMaxRating(undefined);
-  }
+  };
 
   // Array containing the products that will be presented on the page after applying filters
   const displayedProducts = filteredProdData?.filteredProducts?.products || [];
@@ -230,80 +235,114 @@ const Home = () => {
           setMaxRating={setMaxRating}
           sortOption={sortOption}
           handleSortMenuClick={handleSortMenuClick}
-          handleResetAll = {handleResetAll}
+          handleResetAll={handleResetAll}
         />
       </div>
 
-      <Row gutter={[16, 16]} justify="center">
-        {displayedProducts.map((product) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={product._id}>
-            <div
-              style={{
-                borderRadius: "8px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                padding: "16px",
-                textAlign: "center",
-              }}
-            >
-              <Link
-                to={`/product/${product._id}`}
-                style={{
-                  color: "inherit",
-                }}
-              >
+      {categoriesLoading ? ( // Display a loading spinner while categories are being fetched
+        <Spin size="large" />
+      ) : categoriesError ? ( // Display an error message if an error occurred while fetching categories
+        <Alert
+          message="Error"
+          description="Failed to fetch categories. Please try again later."
+          type="error"
+          showIcon
+        />
+      ) : (
+        <Row gutter={[16, 16]} justify="center">
+          {filteredProdLoad ? ( // Display a loading spinner while products are being fetched
+            <Spin size="large" />
+          ) : filteredProdError ? ( // Display an error message if an error occurred while fetching products
+            <Alert
+              message="Error"
+              description="Failed to fetch products. Please try again later."
+              type="error"
+              showIcon
+            />
+          ) : (
+            displayedProducts.map((product) => (
+              <Col xs={24} sm={12} md={8} lg={6} key={product._id}>
                 <div
                   style={{
-                    cursor: "pointer",
-                    marginBottom: "16px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    padding: "16px",
+                    textAlign: "center",
                   }}
                 >
-                  <img
-                    src={product.image}
-                    alt={product.title}
+                  <Link
+                    to={`/product/${product._id}`}
                     style={{
-                      width: "100%",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "8px",
+                      color: "inherit",
                     }}
                   >
-                    <h3 style={{ marginBottom: "4px", fontWeight: "bold" }}>
-                      {product.title}
-                    </h3>
-                    <p style={{ marginBottom: "4px", fontWeight: "bold" }}>
-                      ${product.price}
-                    </p>
-                  </div>
-                  <div style={{ marginBottom: "4px" }}>
-                    <Rate
-                      allowHalf
-                      disabled
-                      defaultValue={product.averageRating || 0}
-                      style={{ color: "#ffd700", marginRight: "8px" }}
-                    />
-                    <span>({product.reviews.length})</span>
-                  </div>
+                    <div
+                      style={{
+                        cursor: "pointer",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        style={{
+                          width: "100%",
+                          borderRadius: "8px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        <h3 style={{ marginBottom: "4px", fontWeight: "bold" }}>
+                          {product.title}
+                        </h3>
+                        <p style={{ marginBottom: "4px", fontWeight: "bold" }}>
+                          ${product.price}
+                        </p>
+                      </div>
+                      <div style={{ marginBottom: "4px" }}>
+                        <Rate
+                          allowHalf
+                          disabled
+                          defaultValue={product.averageRating || 0}
+                          style={{ color: "#ffd700", marginRight: "8px" }}
+                        />
+                        <span>({product.reviews.length})</span>
+                      </div>
+                    </div>
+                  </Link>
+                  <Button
+                    type="primary"
+                    shape="round"
+                    size="large"
+                    icon={<ShoppingOutlined />}
+                    onClick={() => handleAddToCart(product._id)}
+                    style={{ width: "100%" }}
+                    loading={addProdToCartLoad} // Display a loading state when adding a product to the cart
+                    disabled={addProdToCartLoad || addProdToCartError} // Disable the button if there's an ongoing request or error
+                  >
+                    Add to Cart
+                  </Button>
+                  {addProdToCartError && ( // Display an error message if there was an error adding the product to the cart
+                    <div style={{ marginTop: "8px" }}>
+                      <Alert
+                        message="Error"
+                        description="Failed to add product to cart. Please try again later."
+                        type="error"
+                        showIcon
+                      />
+                    </div>
+                  )}
                 </div>
-              </Link>
-              <Button
-                type="primary"
-                shape="round"
-                size="large"
-                icon={<ShoppingOutlined />}
-                onClick={() => handleAddToCart(product._id)}
-                style={{ width: "100%" }}
-              >
-                Add to Cart
-              </Button>
-            </div>
-          </Col>
-        ))}
-      </Row>
+              </Col>
+            ))
+          )}
+        </Row>
+      )}
       <Pagination
         current={page}
         pageSize={pageSize}

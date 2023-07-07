@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
+
 import {
   Spin,
   Result,
@@ -12,10 +13,12 @@ import {
   Divider,
   Pagination,
   Tag,
+  Alert,
 } from "antd";
+
 import { GET_ORDERS_BY_USER } from "../utils/queries";
-import formatDateTime from "../utils/helper";
 import AuthService from "../utils/auth";
+import formatDateTime from "../utils/helper";
 
 const { Title, Text } = Typography;
 
@@ -36,6 +39,7 @@ const Orders = () => {
     },
   });
 
+  // Refetch the orders data when there is a change (this will render the users new order without having to refresh the page)
   useEffect(() => {
     refetchOrders();
   }, [ordersData, refetchOrders]);
@@ -70,17 +74,25 @@ const Orders = () => {
   return (
     <div style={{ padding: "24px" }}>
       <Title level={2}>My Orders</Title>
-      {orders && ordersLoading ? (
+      {ordersLoading && (
         <div
           style={{ textAlign: "center", fontSize: "18px", marginTop: "20px" }}
         >
           <Spin size="large" />
         </div>
-      ) : orders && ordersError ? (
-        <Result status="error" title="Error loading orders" />
-      ) : (
+      )}
+      {ordersError && (
+        <Alert
+          message="Error"
+          description="Failed to your ourders. Please try again later."
+          type="error"
+          showIcon
+          style={{ marginTop: "8px" }}
+        />
+      )}
+      {!ordersLoading && !ordersError && (
         <>
-          {orders && orders.length === 0 ? (
+          {orders.length === 0 ? (
             <Result
               status="info"
               title="You have no orders yet"
@@ -107,7 +119,7 @@ const Orders = () => {
                             {order.name}
                           </Title>
                           <Text strong>Order ID: </Text>
-                          <Text>{order._id}</Text> {/* Display the order ID */}
+                          <Text>{order._id}</Text>
                           <Divider style={{ margin: "16px 0" }} />
                           <Text strong>Date Ordered: </Text>
                           <Text>{formatDateTime(order.createdAt)}</Text>
