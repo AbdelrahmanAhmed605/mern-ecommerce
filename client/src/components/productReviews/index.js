@@ -63,7 +63,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
   const {
     loading: userReviewLoading,
     data: userReviewData,
-    error: userReviewsError,
+    error: userReviewError,
     refetch: refetchUserReview,
   } = useQuery(GET_USER_PRODUCT_REVIEW, {
     variables: {
@@ -203,16 +203,23 @@ const ProductReviews = ({ productId, refetchProduct }) => {
     }
   };
 
-  if (reviewsLoading) {
-    return <div>Loading reviews...</div>;
-  }
-
-  if (reviewsError) {
-    return <div>Error loading reviews</div>;
-  }
-
   return (
     <>
+      {userReviewLoading && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <Spin spinning={true} size="large" />
+          <p>Loading your review...</p>
+        </div>
+      )}
+      {userReviewError && (
+        <Alert
+          message="Error"
+          description="Failed to fetch your review. Please try again later."
+          type="error"
+          showIcon
+          style={{ marginBottom: "16px" }}
+        />
+      )}
       <div>
         {userReview && userReview.user ? (
           // User has posted a review for this product
@@ -372,7 +379,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
       <Divider />
       <div>
         <h3>Product Reviews</h3>
-        {userReviewsError && (
+        {reviewsError && (
           <Alert
             message="Error"
             description="Failed to fetch product reviews. Please try again later."
@@ -381,7 +388,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
             style={{ marginBottom: "16px" }}
           />
         )}
-        {userReviewLoading && (
+        {reviewsLoading && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
             <Spin spinning={true} size="large" />
             <p>Loading reviews...</p>
