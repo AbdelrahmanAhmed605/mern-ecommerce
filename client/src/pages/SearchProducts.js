@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, Link } from "react-router-dom";
 
@@ -54,12 +54,14 @@ const SearchProducts = () => {
     loading: searchProductsLoading,
     data: searchProductsData,
     error: searchProductsError,
+    refetch: refetchProducts,
   } = useQuery(GET_PRODUCTS_BY_SEARCH, {
     variables: {
       searchTerm: searchTerm,
       page,
       pageSize,
     },
+    pollInterval: 5000, // Interval for re-fetching data every 5000ms (5 seconds)
   });
 
   // Lazy Query for fetching the currently logged-in user
@@ -73,6 +75,11 @@ const SearchProducts = () => {
     addProdToCart,
     { loading: addProdToCartLoad, error: addProdToCartError },
   ] = useMutation(ADD_PROD_TO_CART);
+
+  // Refetches the data if there is any change (this is as a fallback option to the pollInterval)
+  useEffect(() => {
+    refetchProducts();
+  }, [searchProductsData, refetchProducts]);
 
   // Retrieve products and total count from the search result data
   const products = searchProductsData?.searchProducts?.products || [];
@@ -178,7 +185,14 @@ const SearchProducts = () => {
         <>
           <Row gutter={[16, 16]} justify="center">
             {products.map((product) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={product._id}>
+              <Col
+                xs={24}
+                sm={12}
+                md={8}
+                lg={6}
+                key={product._id}
+                style={{ display: "flex" }}
+              >
                 <div
                   style={{
                     borderRadius: "8px",
@@ -186,6 +200,10 @@ const SearchProducts = () => {
                     padding: "16px",
                     textAlign: "center",
                     backgroundColor: "#fff",
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
                   }}
                 >
                   <Link

@@ -73,8 +73,11 @@ const Home = () => {
       loading: filteredProdLoad,
       data: filteredProdData,
       error: filteredProdError,
+      refetch: refetchProducts,
     },
-  ] = useLazyQuery(GET_FILTERED_PRODUCTS);
+  ] = useLazyQuery(GET_FILTERED_PRODUCTS, {
+    pollInterval: 5000, // Interval for re-fetching data every 5000ms (5 seconds)
+  });
 
   // Lazy Query for fetching the currently logged in user
   const [fetchCurrentUser] = useLazyQuery(GET_ME);
@@ -113,6 +116,11 @@ const Home = () => {
     pageSize,
     fetchProductsByFilter,
   ]);
+
+  // Refetches the data if there is any change (this is as a fallback option to the pollInterval)
+  useEffect(() => {
+    refetchProducts();
+  }, [filteredProdData, refetchProducts]);
 
   // Adds a product to the user's shopping cart. Handles user authentication, cart creation, and product addition.
   // Displays appropriate messages for success and failure.
@@ -274,13 +282,24 @@ const Home = () => {
             />
           ) : (
             displayedProducts.map((product) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={product._id}>
+              <Col
+                xs={24}
+                sm={12}
+                md={8}
+                lg={6}
+                key={product._id}
+                style={{ display: "flex" }}
+              >
                 <div
                   style={{
                     borderRadius: "8px",
                     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                     padding: "16px",
                     textAlign: "center",
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
                   }}
                 >
                   <Link
@@ -355,7 +374,8 @@ const Home = () => {
                   >
                     {addProdToCartLoad ? "Adding to Cart" : "Add to Cart"}
                   </Button>
-                  {addProdToCartError && ( // Display an error message if there was an error adding the product to the cart
+                  {addProdToCartError && (
+                    // Display an error message if there was an error adding the product to the cart
                     <div style={{ marginTop: "8px" }}>
                       <Alert
                         message="Error"

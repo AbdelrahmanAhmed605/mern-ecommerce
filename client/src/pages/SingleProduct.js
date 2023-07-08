@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 
@@ -58,6 +58,7 @@ const SingleProduct = () => {
     variables: {
       productId: productId,
     },
+    pollInterval: 3000, // Interval for re-fetching data every 3000ms (3 seconds)
   });
   const product = productData?.product || {};
 
@@ -72,6 +73,10 @@ const SingleProduct = () => {
     addProdToCart,
     { loading: addProdToCartLoad, error: addProdToCartError },
   ] = useMutation(ADD_PROD_TO_CART);
+
+  useEffect(() => {
+    refetchProduct();
+  }, [productData, refetchProduct]);
 
   // Handles the user changing the quantity of the product they want to add
   const handleQuantityChange = (value) => {
@@ -143,6 +148,20 @@ const SingleProduct = () => {
 
   return (
     <div style={{ padding: "16px", textAlign: "center" }}>
+      {product.stockQuantity <= 20 && product.stockQuantity > 0 && (
+        <div style={{ marginBottom: "16px" }}>
+          <Alert
+            message={`Product almost out of stock! Only ${product.stockQuantity} left in stock`}
+            type="warning"
+            showIcon
+          />
+        </div>
+      )}
+      {product.stockQuantity <= 0 && (
+        <div style={{ marginBottom: "16px" }}>
+          <Alert message={`Product out of stock!`} type="warning" showIcon />
+        </div>
+      )}
       <Row gutter={[16, 16]} justify="center">
         <Col xs={24} lg={12}>
           <img
@@ -263,20 +282,6 @@ const SingleProduct = () => {
             )}
           </div>
         </Col>
-        {product.stockQuantity <= 20 && product.stockQuantity > 0 && (
-          <div style={{ marginBottom: "16px" }}>
-            <Alert
-              message={`Product almost out of stock! Only ${product.stockQuantity} left in stock`}
-              type="warning"
-              showIcon
-            />
-          </div>
-        )}
-        {product.stockQuantity <= 0 && (
-          <div style={{ marginBottom: "16px" }}>
-            <Alert message={`Product out of stock!`} type="warning" showIcon />
-          </div>
-        )}
       </Row>
       <ProductReviews productId={productId} refetchProduct={refetchProduct} />
       <Modal
