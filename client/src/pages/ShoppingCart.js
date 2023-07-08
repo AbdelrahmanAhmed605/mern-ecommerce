@@ -18,6 +18,7 @@ import {
   UPDATE_CART_PROD_QUANTITY,
 } from "../utils/mutations";
 import { GET_CART } from "../utils/queries";
+import AuthService from "../utils/auth";
 
 // Component for displaying the shopping cart
 const ShoppingCart = () => {
@@ -26,7 +27,9 @@ const ShoppingCart = () => {
     loading: cartLoading,
     error: cartError,
     data: cartData,
-  } = useQuery(GET_CART);
+  } = useQuery(GET_CART, {
+    pollInterval: 5000, // Interval for re-fetching data every 5000ms (5 seconds)
+  });
   const cart = cartData?.cart || []; // Extracts the cart from the query data
 
   // Mutation for removing a product from the cart
@@ -56,6 +59,16 @@ const ShoppingCart = () => {
     });
   };
 
+  // Check if the user is accessing the page while logged out and display a message to inform them they must be logged in
+  if (!AuthService.loggedIn()) {
+    return (
+      <div style={{ textAlign: "center", fontSize: "18px", marginTop: "20px" }}>
+        <Spin spinning={true} size="large" />
+        <p>Please log in to view your shopping cart</p>
+      </div>
+    );
+  }
+
   // Table columns for displaying the items in the cart
   const columns = [
     {
@@ -77,7 +90,7 @@ const ShoppingCart = () => {
       dataIndex: "title",
       key: "title",
       render: (title, record) => (
-        <Link to={`/product/${record._id}`} target="_blank">
+        <Link to={`/product/${record._id}`}>
           <div>{title}</div>
           <div>Product ID: {record._id}</div>
         </Link>
@@ -199,7 +212,7 @@ const ShoppingCart = () => {
           style={{ marginTop: "8px" }}
         />
       )}
-      {cart && (
+      {cart && cart.products && (
         // Create a table with the cart's data source and display the data as rendered in the "columns" variable
         <Table
           dataSource={cart.products.map((item) => ({

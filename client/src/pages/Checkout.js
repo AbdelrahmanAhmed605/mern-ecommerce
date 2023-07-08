@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Row,
@@ -63,7 +63,9 @@ const Checkout = () => {
     loading: cartLoading,
     data: cartData,
     error: cartError,
-  } = useQuery(GET_CART);
+  } = useQuery(GET_CART, {
+    pollInterval: 5000, // Interval for re-fetching data every 5000ms (5 seconds)
+  });
   const cart = cartData?.cart || [];
 
   // Form instance for handling form operations
@@ -337,20 +339,29 @@ const Checkout = () => {
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        marginRight: "16px",
+                        justifyContent: "space-between",
+                        marginRight: "30px",
                       }}
                     >
-                      <img
-                        src={item.product.image}
-                        alt={item.product.title}
+                      <Link
+                        to={`/product/${item.product._id}`}
                         style={{
-                          width: "80px",
-                          objectFit: "contain",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
                         }}
-                      />
-                      <p>{item.product.title}</p>
-                      <p>X{item.quantity}</p>
-                      <p>{item.product.title}</p>
+                      >
+                        <img
+                          src={item.product.image}
+                          alt={item.product.title}
+                          style={{
+                            width: "80px",
+                            objectFit: "contain",
+                          }}
+                        />
+                        <p>{item.product.title}</p>
+                      </Link>
+
                       <p>X{item.quantity}</p>
                       {item.product.stockQuantity <= 20 &&
                         item.product.stockQuantity > 0 && (

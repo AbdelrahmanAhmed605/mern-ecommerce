@@ -56,7 +56,7 @@ const Navbar = () => {
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
-  // store for checking when a cart has been created to refetch the cartData so the user does not have to 
+  // store for checking when a cart has been created to refetch the cartData so the user does not have to
   // refresh the page to see their products in the Navbar
   const cartCreated = useCartCreatedStore((state) => state.cartCreated);
 
@@ -66,7 +66,9 @@ const Navbar = () => {
     data: cartData,
     error: cartError,
     refetch: cartRefetch,
-  } = useQuery(GET_CART);
+  } = useQuery(GET_CART, {
+    pollInterval: 5000, // Polling interval in milliseconds (e.g., 5000ms = 5 seconds)
+  });
   const cart = cartData?.cart || [];
 
   // mutation to change the quanitity of a product in the shopping cart
