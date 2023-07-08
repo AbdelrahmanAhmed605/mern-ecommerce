@@ -14,6 +14,7 @@ import {
   Checkbox,
   Alert,
   Spin,
+  Typography,
 } from "antd";
 
 import { loadStripe } from "@stripe/stripe-js";
@@ -91,7 +92,13 @@ const Checkout = () => {
   const deliveryCost = cart.totalPrice > 100 ? 0 : 10;
 
   // Calculate total price including order value, delivery cost, and estimated tax
-  const totalPrice = cart.totalPrice + deliveryCost + taxRate * cart.totalPrice;
+  let totalPrice =
+    cart.totalPrice && typeof cart.totalPrice === "number"
+      ? cart.totalPrice + deliveryCost + taxRate * cart.totalPrice
+      : 0.0;
+
+  // Formats the total price to 2 decimal places to ensure it is in the correct format when sent to the backend for Stripe payment processing
+  let formattedTotalPrice = totalPrice.toFixed(2);
 
   // Validation rules for the postal code field
   const postalCodeValidationRules = [
@@ -154,7 +161,7 @@ const Checkout = () => {
             productId: item.product._id,
             orderQuantity: item.quantity,
           })),
-          totalAmount: cartData.cart.totalPrice,
+          totalAmount: parseFloat(formattedTotalPrice),
           address: {
             street: shippingInfo.address,
             city: shippingInfo.city,
@@ -176,7 +183,7 @@ const Checkout = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: totalPrice,
+          amount: formattedTotalPrice,
           currency: "cad",
         }),
       });
@@ -220,7 +227,7 @@ const Checkout = () => {
         const errorMessage = error.graphQLErrors[0].message;
         message.error(errorMessage);
       } else {
-        console.error("Error creating payment intent:", error);
+        console.error("Failed to create payment", error);
         message.error("Failed to create payment");
       }
     }
@@ -254,7 +261,7 @@ const Checkout = () => {
           <p>Order value: ${cart.totalPrice}</p>
           <p>Delivery cost: ${deliveryCost}</p>
           <p>Est Tax: ${(0.05 * cart.totalPrice).toFixed(2)}</p>
-          <p>Total Price: ${totalPrice.toFixed(2)}</p>
+          <p>Total Price: ${formattedTotalPrice}</p>
         </Card>
 
         <Alert
@@ -343,6 +350,24 @@ const Checkout = () => {
                       />
                       <p>{item.product.title}</p>
                       <p>X{item.quantity}</p>
+                      <p>{item.product.title}</p>
+                      <p>X{item.quantity}</p>
+                      {item.product.stockQuantity <= 20 &&
+                        item.product.stockQuantity > 0 && (
+                          <div style={{ marginTop: "8px" }}>
+                            <Typography.Text type="danger">
+                              Product almost out of stock! Only{" "}
+                              {item.product.stockQuantity} left.
+                            </Typography.Text>
+                          </div>
+                        )}
+                      {item.product.stockQuantity <= 0 && (
+                        <div style={{ marginTop: "8px" }}>
+                          <Typography.Text type="danger">
+                            Product out of stock!
+                          </Typography.Text>
+                        </div>
+                      )}
                       <p>${item.product.price * item.quantity}</p>
                       <Button
                         type="primary"

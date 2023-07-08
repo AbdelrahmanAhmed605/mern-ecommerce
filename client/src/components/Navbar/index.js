@@ -13,6 +13,7 @@ import {
   InputNumber,
   Alert,
   Spin,
+  Typography,
 } from "antd";
 import {
   UserOutlined,
@@ -36,11 +37,13 @@ import {
   useLoginStatusStore,
   useSignUpAndLoginStore,
 } from "../../store/userStore";
+import { useCartCreatedStore } from "../../store/cartStore";
 
 const { Search } = Input;
 
 const Navbar = () => {
   const navigate = useNavigate();
+
   // State for checking the user's screen size
   const [windowSize, setWindowSize] = useState(window.innerWidth);
   // store for checking the users logged in status
@@ -53,6 +56,9 @@ const Navbar = () => {
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
+  // store for checking when a cart has been created to refetch the cartData so the user does not have to 
+  // refresh the page to see their products in the Navbar
+  const cartCreated = useCartCreatedStore((state) => state.cartCreated);
 
   // Query to get shopping cart data
   const {
@@ -64,10 +70,9 @@ const Navbar = () => {
   const cart = cartData?.cart || [];
 
   // mutation to change the quanitity of a product in the shopping cart
-  const [
-    updateProdQuantity,
-    {error: prodQuantityError },
-  ] = useMutation(UPDATE_CART_PROD_QUANTITY);
+  const [updateProdQuantity, { error: prodQuantityError }] = useMutation(
+    UPDATE_CART_PROD_QUANTITY
+  );
 
   // mutation to remove a product in the shopping cart
   const [
@@ -79,12 +84,17 @@ const Navbar = () => {
     navigate(`/products/${searchTerm}`);
   };
 
-  // useEffect hook to refetch userReviewData when user logs in
+  // useEffect hook to refetch the user's cart data when user logs in
   useEffect(() => {
     if (isLoggedIn) {
       cartRefetch();
     }
-  }, [isLoggedIn, cartRefetch]);
+  }, [isLoggedIn, cartCreated, cartRefetch]);
+
+  // useEffect hook to refetch the user's cart data when cart data is changed
+  useEffect(() => {
+    cartRefetch();
+  }, [cartData, cartRefetch]);
 
   useEffect(() => {
     // Function to handle window resize event
@@ -316,6 +326,7 @@ const Navbar = () => {
                                       </span>
                                       <InputNumber
                                         min={1}
+                                        max={item.product.stockQuantity}
                                         value={item.quantity}
                                         style={{ fontSize: "18px" }}
                                         formatter={(value) => `${value}`}
@@ -330,19 +341,23 @@ const Navbar = () => {
                                           <Button
                                             shape="circle"
                                             icon={<MinusOutlined />}
+                                            disabled={item.quantity <= 1}
                                             onClick={() =>
                                               handleQuantityChange(
                                                 item.quantity - 1,
                                                 item.product._id
                                               )
                                             }
-                                            disabled={item.quantity <= 1}
                                           />
                                         }
                                         addonAfter={
                                           <Button
                                             shape="circle"
                                             icon={<PlusOutlined />}
+                                            disabled={
+                                              item.quantity >=
+                                              item.product.stockQuantity
+                                            }
                                             onClick={() =>
                                               handleQuantityChange(
                                                 item.quantity + 1,
@@ -353,6 +368,22 @@ const Navbar = () => {
                                         }
                                       />
                                     </div>
+                                    {item.product.stockQuantity <= 20 &&
+                                      item.product.stockQuantity > 0 && (
+                                        <div style={{ marginTop: "8px" }}>
+                                          <Typography.Text type="danger">
+                                            Product almost out of stock! Only{" "}
+                                            {item.product.stockQuantity} left.
+                                          </Typography.Text>
+                                        </div>
+                                      )}
+                                    {item.product.stockQuantity <= 0 && (
+                                      <div style={{ marginTop: "8px" }}>
+                                        <Typography.Text type="danger">
+                                          Product out of stock!
+                                        </Typography.Text>
+                                      </div>
+                                    )}
                                     {prodQuantityError && (
                                       <Alert
                                         message="Error"

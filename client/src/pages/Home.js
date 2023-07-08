@@ -26,7 +26,11 @@ import AuthService from "../utils/auth";
 
 import UserForm from "../components/UserForm";
 import FilterOptions from "../components/HomeFilters";
-import { useSignUpAndLoginStore } from "../store/userStore";
+import {
+  useSignUpAndLoginStore,
+  useLoginStatusStore,
+} from "../store/userStore";
+import { useCartCreatedStore } from "../store/cartStore";
 
 const { Title } = Typography;
 
@@ -41,12 +45,18 @@ const Home = () => {
   const [page, setPage] = useState(1); // Current page number
   const [pageSize, setPageSize] = useState(10); // Number of products per page
 
+  // store for checking the visibility of the sign up/login modal
   const userFormVisibility = useSignUpAndLoginStore(
     (state) => state.userFormVisibility
   );
+  // store for setting the visiblity of the sign up/login modal
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
+  // store for checking the users logged in status
+  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn);
+  // store for setting the cartCreated status
+  const setCartCreated = useCartCreatedStore((state) => state.setCartCreated);
 
   // Query for fetching all categories id's and name
   const {
@@ -127,9 +137,12 @@ const Home = () => {
       const { data } = await fetchCurrentUser(); // Fetch the current user after successful login
       const userData = data;
 
-      // If user doesn't have a cart, create one
-      if (!userData.me.cart) {
+      // If user doesn't have a cart and they are not logged in, create one
+      // since we are not refetching the cart data in this file, we use the
+      // loggedIn store to determine if a cart was already created
+      if (!userData.me.cart && !isLoggedIn) {
         await createCart();
+        setCartCreated(true); // Changes the cartCreated status to true as this store will be used in other files to refetch the cart once it has been created
       }
 
       // Add the product to the cart
@@ -315,6 +328,21 @@ const Home = () => {
                       </div>
                     </div>
                   </Link>
+                  {product.stockQuantity <= 20 && product.stockQuantity > 0 && (
+                    <div style={{ margin: "20px 0" }}>
+                      <Typography.Text type="danger">
+                        Product almost out of stock! Only{" "}
+                        {product.stockQuantity} left.
+                      </Typography.Text>
+                    </div>
+                  )}
+                  {product.stockQuantity <= 0 && (
+                    <div style={{ margin: "20px 0" }}>
+                      <Typography.Text type="danger">
+                        Product out of stock!
+                      </Typography.Text>
+                    </div>
+                  )}
                   <Button
                     type="primary"
                     shape="round"
@@ -325,7 +353,7 @@ const Home = () => {
                     loading={addProdToCartLoad} // Display a loading state when adding a product to the cart
                     disabled={addProdToCartLoad || addProdToCartError} // Disable the button if there's an ongoing request or error
                   >
-                    Add to Cart
+                    {addProdToCartLoad ? "Adding to Cart" : "Add to Cart"}
                   </Button>
                   {addProdToCartError && ( // Display an error message if there was an error adding the product to the cart
                     <div style={{ marginTop: "8px" }}>

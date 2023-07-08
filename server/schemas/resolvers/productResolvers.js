@@ -255,7 +255,7 @@ const productResolvers = {
 
         // Find and update the product with the provided ID and owned by the authenticated user
         const product = await Product.findOneAndUpdate(
-          { _id: args.id, user: context.user._id },
+          { _id: args.id },
           { ...args },
           { new: true }
         );

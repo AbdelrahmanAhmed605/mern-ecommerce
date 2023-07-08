@@ -20,8 +20,12 @@ import { GET_PRODUCTS_BY_SEARCH, GET_ME } from "../utils/queries";
 import { ADD_PROD_TO_CART, CREATE_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
 
-import { useSignUpAndLoginStore } from "../store/userStore";
 import UserForm from "../components/UserForm";
+import {
+  useSignUpAndLoginStore,
+  useLoginStatusStore,
+} from "../store/userStore";
+import { useCartCreatedStore } from "../store/cartStore";
 
 const { Title, Text } = Typography;
 
@@ -40,6 +44,10 @@ const SearchProducts = () => {
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
+  // store for checking the users logged in status
+  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn);
+  // store for setting the cartCreated status
+  const setCartCreated = useCartCreatedStore((state) => state.setCartCreated);
 
   // Query for fetching all categories id's and name
   const {
@@ -92,9 +100,12 @@ const SearchProducts = () => {
       const { data } = await fetchCurrentUser(); // Fetch the current user after successful login
       const userData = data;
 
-      // If the user doesn't have a cart, create one
-      if (!userData.me.cart) {
+      // If user doesn't have a cart and they are not logged in, create one
+      // since we are not refetching the cart data in this file, we use the
+      // loggedIn store to determine if a cart was already created
+      if (!userData.me.cart && !isLoggedIn) {
         await createCart();
+        setCartCreated(true); // Changes the cartCreated status to true as this store will be used in other files to refetch the cart once it has been created
       }
 
       // Add the product to the cart
@@ -229,6 +240,21 @@ const SearchProducts = () => {
                       </div>
                     </div>
                   </Link>
+                  {product.stockQuantity <= 20 && product.stockQuantity > 0 && (
+                    <div style={{ margin: "20px 0" }}>
+                      <Typography.Text type="danger">
+                        Product almost out of stock! Only{" "}
+                        {product.stockQuantity} left.
+                      </Typography.Text>
+                    </div>
+                  )}
+                  {product.stockQuantity <= 0 && (
+                    <div style={{ margin: "20px 0" }}>
+                      <Typography.Text type="danger">
+                        Product out of stock!
+                      </Typography.Text>
+                    </div>
+                  )}
                   <Button
                     type="primary"
                     shape="round"
