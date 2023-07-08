@@ -122,7 +122,7 @@ const orderResolvers = {
             throw new UserInputError(`Product with ID ${productId} not found`);
           }
 
-          // Check if the product has sufficient quantity in stock
+          // Return error if product is not in sufficient stock
           if (product.stockQuantity < orderQuantity) {
             throw new UserInputError(
               `Insufficient stock for product '${product.title}'. Only ${product.stockQuantity} units left in stock.`

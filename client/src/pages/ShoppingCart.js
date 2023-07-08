@@ -2,7 +2,15 @@ import React from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
 
-import { Button, InputNumber, Table, Space, Spin, Alert } from "antd";
+import {
+  Button,
+  InputNumber,
+  Table,
+  Space,
+  Spin,
+  Alert,
+  Typography,
+} from "antd";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 
 import {
@@ -55,7 +63,7 @@ const ShoppingCart = () => {
       dataIndex: "image",
       key: "image",
       render: (image, record) => (
-        <Link to={`/product/${record._id}`} target="_blank">
+        <Link to={`/product/${record._id}`}>
           <img
             src={image}
             alt="Product"
@@ -80,34 +88,52 @@ const ShoppingCart = () => {
       dataIndex: "quantity",
       key: "quantity",
       render: (quantity, record) => (
-        <InputNumber
-          min={1}
-          value={quantity}
-          style={{
-            width: "200px",
-            marginLeft: "8px",
-            marginRight: "8px",
-            fontSize: "18px",
-          }}
-          formatter={(value) => `${value}`}
-          parser={(value) => parseInt(value)}
-          onChange={(value) => handleQuantityChange(value, record._id)}
-          addonBefore={
-            <Button
-              shape="circle"
-              icon={<MinusOutlined />}
-              onClick={() => handleQuantityChange(quantity - 1, record._id)}
-              disabled={quantity <= 1}
-            />
-          }
-          addonAfter={
-            <Button
-              shape="circle"
-              icon={<PlusOutlined />}
-              onClick={() => handleQuantityChange(quantity + 1, record._id)}
-            />
-          }
-        />
+        <>
+          <InputNumber
+            min={1}
+            max={record.stockQuantity}
+            value={quantity}
+            style={{
+              width: "200px",
+              marginLeft: "8px",
+              marginRight: "8px",
+              fontSize: "18px",
+            }}
+            formatter={(value) => `${value}`}
+            parser={(value) => parseInt(value)}
+            onChange={(value) => handleQuantityChange(value, record._id)}
+            addonBefore={
+              <Button
+                shape="circle"
+                icon={<MinusOutlined />}
+                onClick={() => handleQuantityChange(quantity - 1, record._id)}
+                disabled={quantity <= 1}
+              />
+            }
+            addonAfter={
+              <Button
+                shape="circle"
+                icon={<PlusOutlined />}
+                onClick={() => handleQuantityChange(quantity + 1, record._id)}
+                disabled={quantity >= record.stockQuantity}
+              />
+            }
+          />
+          {record.stockQuantity <= 20 && record.stockQuantity > 0 && (
+            <div style={{ marginTop: "8px" }}>
+              <Typography.Text type="danger">
+                Product almost out of stock! Only {record.stockQuantity} left.
+              </Typography.Text>
+            </div>
+          )}
+          {record.stockQuantity <= 0 && (
+            <div style={{ marginTop: "8px" }}>
+              <Typography.Text type="danger">
+                Product out of stock!
+              </Typography.Text>
+            </div>
+          )}
+        </>
       ),
     },
     {

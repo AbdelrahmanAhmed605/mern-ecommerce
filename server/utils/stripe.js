@@ -11,8 +11,8 @@ const createPaymentIntent = async (amount, currency) => {
     const sanitizedAmount = Math.abs(Number(amount) * 100);
 
     // Check if the amount is invalid (less than or equal to 0)
-    if (amount <= 0) {
-      throw new Error("Invalid amount");
+    if (!amount || !currency) {
+      throw new Error("Missing required fields");
     }
 
     // Check if the required fields (amount and currency) are missing

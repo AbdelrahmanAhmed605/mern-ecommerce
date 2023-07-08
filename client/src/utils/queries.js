@@ -34,6 +34,7 @@ export const GET_PRODUCTS = gql`
       title
       price
       image
+      stockQuantity
       averageRating
       reviews {
         _id
@@ -51,6 +52,7 @@ export const GET_SINGLE_PRODUCT = gql`
       description
       image
       price
+      stockQuantity
       averageRating
       categories {
         _id
@@ -94,6 +96,7 @@ export const GET_FILTERED_PRODUCTS = gql`
         title
         price
         image
+        stockQuantity
         averageRating
         reviews {
           _id
@@ -112,6 +115,7 @@ export const GET_PRODUCTS_BY_SEARCH = gql`
         title
         price
         image
+        stockQuantity
         averageRating
         reviews {
           _id
@@ -130,6 +134,7 @@ export const GET_PRODUCTS_BY_USER = gql`
       title
       price
       image
+      stockQuantity
       averageRating
       reviews {
         _id
@@ -169,6 +174,7 @@ export const GET_CART = gql`
           title
           price
           image
+          stockQuantity
         }
         quantity
       }
