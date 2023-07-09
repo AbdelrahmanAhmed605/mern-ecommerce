@@ -28,6 +28,7 @@ import {
 import { GET_CART } from "../utils/queries";
 import {
   CREATE_ORDER,
+  UPDATE_ORDER,
   REMOVE_PROD_FROM_CART,
   RESET_CART,
 } from "../utils/mutations";
@@ -80,6 +81,9 @@ const Checkout = () => {
   // mutation to add a product into the shopping cart
   const [createOrder, { loading: orderLoading, error: orderError }] =
     useMutation(CREATE_ORDER);
+
+  // mutation to update the status of an error (this will be used to cancel the order if a payment error occurs)
+  const [updateOrder] = useMutation(UPDATE_ORDER);
 
   // mutation to remove a product in the shopping cart
   const [
@@ -235,7 +239,15 @@ const Checkout = () => {
             resolve(); // If the payment was successful, resolve the promise
           }
         } catch (error) {
-          reject(error); // If an error occured, reject the promise
+          // If a payment error occured, cancel the order and reject the promise
+          await updateOrder({
+            variables: {
+              orderId: orderId,
+              newStatus: "canceled",
+            },
+          });
+
+          reject(error);
         }
       });
 
@@ -257,9 +269,9 @@ const Checkout = () => {
         console.error("Failed to create payment", error);
         message.error("Failed to create payment");
       }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   // Check if the user is accessing the page while logged out and display a message to inform them they must be logged in

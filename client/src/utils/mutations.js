@@ -179,6 +179,19 @@ export const CREATE_ORDER = gql`
   }
 `;
 
+export const UPDATE_ORDER = gql`
+  mutation UpdateOrder($orderId: ID!, $newStatus: String!) {
+    updateOrder(orderId: $orderId, newStatus: $newStatus) {
+      _id
+      status
+      totalAmount
+      user {
+        _id
+      }
+    }
+  }
+`;
+
 // Mutation for creating a new product review
 export const CREATE_REVIEW = gql`
   mutation CreateReview($productId: ID!, $rating: Float!, $comment: String!) {
