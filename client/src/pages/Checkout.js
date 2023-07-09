@@ -28,6 +28,7 @@ import {
 import { GET_CART } from "../utils/queries";
 import {
   CREATE_ORDER,
+  UPDATE_ORDER,
   REMOVE_PROD_FROM_CART,
   RESET_CART,
 } from "../utils/mutations";
@@ -80,6 +81,9 @@ const Checkout = () => {
   // mutation to add a product into the shopping cart
   const [createOrder, { loading: orderLoading, error: orderError }] =
     useMutation(CREATE_ORDER);
+
+  // mutation to update the status of an error (this will be used to cancel the order if a payment error occurs)
+  const [updateOrder] = useMutation(UPDATE_ORDER);
 
   // mutation to remove a product in the shopping cart
   const [
@@ -156,75 +160,108 @@ const Checkout = () => {
     }
 
     try {
-      // Create order
-      const { data: orderData } = await createOrder({
-        variables: {
-          products: cartData.cart.products.map((item) => ({
-            productId: item.product._id,
-            orderQuantity: item.quantity,
-          })),
-          totalAmount: parseFloat(formattedTotalPrice),
-          address: {
-            street: shippingInfo.address,
-            city: shippingInfo.city,
-            state: shippingInfo.state,
-            postalCode: shippingInfo.postalCode,
-          },
-          status: "pending",
-          name: shippingInfo.name,
-          email: shippingInfo.email,
-        },
-      });
+      let orderId; // stores the ID of the created order
 
-      const orderId = orderData.createOrder._id;
-
-      // Create payment intent
-      const response = await fetch("/api/payments/create-payment-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: formattedTotalPrice,
-          currency: "cad",
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create payment intent");
-      }
-
-      const { client_secret } = await response.json();
-
-      // Process the payment using Stripe API
-      const { error: paymentError } = await stripe.confirmCardPayment(
-        client_secret,
-        {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              name: values.cardName,
+      // Promise for creating an order
+      const orderPromise = new Promise(async (resolve, reject) => {
+        try {
+          // Create order
+          const { data: orderData } = await createOrder({
+            variables: {
+              products: cartData.cart.products.map((item) => ({
+                productId: item.product._id,
+                orderQuantity: item.quantity,
+              })),
+              totalAmount: parseFloat(formattedTotalPrice),
               address: {
-                line1: values.address,
-                city: values.city,
-                state: values.state,
-                postal_code: values.postalCode,
+                street: shippingInfo.address,
+                city: shippingInfo.city,
+                state: shippingInfo.state,
+                postalCode: shippingInfo.postalCode,
               },
+              status: "pending",
+              name: shippingInfo.name,
+              email: shippingInfo.email,
             },
-          },
-        }
-      );
+          });
 
-      if (paymentError) {
-        message.error("Payment failed");
-      } else {
-        message.success("Order Complete");
-        // Once the Order is created and payment successful, we can reset the user's cart and remove all the products inside
-        await resetCart({ refetchQueries: [{ query: GET_CART }] });
-        // Redirect the user to a confirmation page
-        navigate(`/confirmation/${orderId}`);
-      }
+          orderId = orderData.createOrder._id;
+          resolve(orderId); // If order is created, resolve the promise
+        } catch (error) {
+          reject(error); // If order creation fails, reject the promise. The error will be passed to the catch block
+        }
+      });
+
+      // Promise for creating a payment
+      const paymentPromise = new Promise(async (resolve, reject) => {
+        try {
+          // Create payment intent
+          const response = await fetch("/api/payments/create-payment-intent", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              amount: formattedTotalPrice,
+              currency: "cad",
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to create payment intent");
+          }
+
+          const { client_secret } = await response.json();
+
+          // Process the payment using Stripe API
+          const { error: paymentError } = await stripe.confirmCardPayment(
+            client_secret,
+            {
+              payment_method: {
+                card: elements.getElement(CardElement),
+                billing_details: {
+                  name: values.cardName,
+                  address: {
+                    line1: values.address,
+                    city: values.city,
+                    state: values.state,
+                    postal_code: values.postalCode,
+                  },
+                },
+              },
+            }
+          );
+
+          // Checks if the error occured from the Stripe API call
+          if (paymentError) {
+            reject(paymentError);
+          } else {
+            resolve(); // If the payment was successful, resolve the promise
+          }
+        } catch (error) {
+          // If a payment error occured, cancel the order and reject the promise
+          await updateOrder({
+            variables: {
+              orderId: orderId,
+              newStatus: "canceled",
+            },
+          });
+
+          reject(error);
+        }
+      });
+
+      // Wait for both promises to complete before proceeding (success message should only appear if both the order AND the payment were successfully completed)
+      await Promise.all([orderPromise, paymentPromise]);
+      message.success("Order Complete");
+
+      // Once the Order is created and payment successful, we can reset the user's cart and remove all the products inside
+      await resetCart({ refetchQueries: [{ query: GET_CART }] });
+
+      // Redirect the user to a confirmation page
+      navigate(`/confirmation/${orderId}`);
     } catch (error) {
+      // Checks if the error is related to a GraphQL error during order creation
       if (error.graphQLErrors && error.graphQLErrors.length > 0) {
         const errorMessage = error.graphQLErrors[0].message;
         message.error(errorMessage);
@@ -232,9 +269,9 @@ const Checkout = () => {
         console.error("Failed to create payment", error);
         message.error("Failed to create payment");
       }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   // Check if the user is accessing the page while logged out and display a message to inform them they must be logged in

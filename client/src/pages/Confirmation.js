@@ -70,9 +70,15 @@ const Confirmation = () => {
 
   return (
     <Card>
-      <Title level={3} style={{ marginBottom: "24px" }}>
-        Order Confirmation
-      </Title>
+      {order.status === "canceled" ? (
+        <Title level={3} style={{ marginBottom: "24px", color: "red" }}>
+          Order Canceled
+        </Title>
+      ) : (
+        <Title level={3} style={{ marginBottom: "24px" }}>
+          Order Confirmed
+        </Title>
+      )}
       <Divider />
       <Row gutter={[16, 24]}>
         {/* Display Order ID */}

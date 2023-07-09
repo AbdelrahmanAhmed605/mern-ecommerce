@@ -194,7 +194,8 @@ const typeDefs = gql`
       address: OrderAddressInput!
       status: String!
     ): Order
-    updateOrder(
+    updateOrder(orderId: ID!, newStatus: String!): Order
+    devUpdatedOrder(
       id: ID!
       name: String
       email: String

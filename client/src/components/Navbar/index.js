@@ -214,7 +214,7 @@ const Navbar = () => {
           >
             {/* User icon and User dropdown menu */}
             {/* If the user is logged in then display the user menu options */}
-            {isLoggedIn ? (
+            {AuthService.loggedIn() ? (
               <Dropdown overlay={userMenu} trigger={["hover"]}>
                 <UserOutlined
                   style={{
@@ -242,7 +242,7 @@ const Navbar = () => {
                 // Only allow the dropdown for larger screens as it covers a large portion of the screen for smaller devices which could distract users
                 windowSize >= 768 ? (
                   <>
-                    {isLoggedIn ? (
+                    {AuthService.loggedIn() ? (
                       // If the user is logged in, display the user's cart total amount, and cart products and their quantities
                       <div
                         style={{

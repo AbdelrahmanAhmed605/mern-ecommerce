@@ -170,10 +170,64 @@ const orderResolvers = {
       }
     },
 
+    // Mutation to update the status of the order on the front-end if a payment process was failed
+    updateOrder: async (parent, { orderId, newStatus }) => {
+      try {
+        // Find the order by ID
+        const order = await Order.findById(orderId);
+        if (!order) {
+          throw new UserInputError("Order not found");
+        }
+
+        // Check if the status is being updated to "canceled"
+        if (newStatus === "canceled" && order.status !== "canceled") {
+          // Update the status to "canceled"
+          order.status = "canceled";
+          await order.save();
+        }
+
+        // Retrieve the products in the canceled order
+        const productsInOrder = order.products;
+
+        // Update the stock quantities of the products in the canceled order
+        const productUpdatesAfterCancellation = productsInOrder.map(
+          async (productInOrder) => {
+            const { productId, orderQuantity } = productInOrder;
+            // Find the product by ID
+            const foundProduct = await Product.findById(productId);
+            if (!foundProduct) {
+              throw new UserInputError(
+                `Product with ID ${productId} not found`
+              );
+            }
+
+            // Add the canceled order quantity back to the product's stock quantity
+            foundProduct.stockQuantity += orderQuantity;
+            await foundProduct.save();
+          }
+        );
+
+        // Wait for all product updates after order cancellation to complete
+        await Promise.all(productUpdatesAfterCancellation);
+
+        return order;
+      } catch (error) {
+        if (
+          error instanceof AuthenticationError ||
+          error instanceof UserInputError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error;
+        } else {
+          throw new Error("Failed to update order");
+        }
+      }
+    },
+
     // ---------- FOR DEVELOPER AND ADMIN USE ----------
 
     // Update an order's existing information
-    updateOrder: async (parent, args, context) => {
+    devUpdatedOrder: async (parent, args, context) => {
       try {
         if (!context.user) {
           throw new AuthenticationError("You need to be logged in!");
@@ -221,14 +275,11 @@ const orderResolvers = {
           // Wait for all product updates after order cancellation to complete
           await Promise.all(productUpdatesAfterCancellation);
         } else {
-          // Update the order with the provided arguments
+          // Update the order with the other provided arguments
           await Order.findByIdAndUpdate(args.id, args);
         }
 
-        // Retrieve the updated order
-        const updatedOrder = await Order.findById(args.id);
-
-        return updatedOrder;
+        return order;
       } catch (error) {
         if (
           error instanceof AuthenticationError ||
