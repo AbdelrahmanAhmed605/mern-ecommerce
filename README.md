@@ -6,6 +6,8 @@ This project is a sample e-commerce website built using the MERN stack (MongoDB,
 
 - [Project Overview](#project-overview)
 - [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
 
 ## Project Overview
 
@@ -39,3 +41,29 @@ The sample e-commerce website offers the following key features:
 - **Reviews**: Users can post reviews for products and read reviews submitted by other users.
 - **User Authentication**: Secure user authentication is implemented, allowing access to specific features only when logged in.
 - **Responsive UI**: The application provides a responsive user interface that adapts to different screen sizes and provides feedback on loading processes and error messages.
+
+## Installation
+
+As this project is a deployed website, there is no installation required. Simply access the website by visiting the provided URL.
+
+## Usage
+
+Upon entering the project, users will land on the main homepage, where they can immediately browse all the available products. The homepage showcases product listings with essential information, including the product image, price, review rating (with the number of reviews), a warning message if the product is low on stock, and an "Add To Cart" button.
+
+Users have the flexibility to apply filters to narrow down their product search and pagination allows them to navigate through multiple pages of products.
+
+By clicking on a product, users are taken to a dedicated single product page. Here, they can access additional information about the product, such as the description and existing product reviews. On the single product page, users can specify the desired quantity before adding the product to their cart. Users can also post their own reviews on this page.
+
+The navigation bar provides convenient options for users to interact with the website. A search bar allows users to search for specific products, while the "Shop all" option returns users to the homepage.
+
+If the user is logged out, the navbar displays a button that opens a pop-up modal, enabling users to sign up or log in. However, if the user is already logged in, the button is replaced with a profile icon, which triggers a dropdown menu. The dropdown menu allows users to edit their profile information, view their order history, or log out.
+
+The navbar also features a shopping cart icon. When hovered over, it opens a small hover dropdown display, showcasing the user's products in the cart. This allows users to conveniently edit product quantities or remove items from the cart without leaving their current page. It's important to note that this hover dropdown display is available for larger screens.
+
+For all screens, when the shopping cart icon is clicked, users are directed to their shopping cart page. The shopping cart page displays a table with all the items in the user's cart. Users can update product quantities or delete items. Clicking on a product in the cart will redirect users to the single product page for further details.
+
+Both the shopping cart hover dropdown display and the shopping cart page contain a button that takes users to the checkout page. On the checkout page, users can enter their shipping details. However, if there are no items in the cart, users will be prompted to add items before proceeding. Once shipping details are entered, users can provide their payment information. The payment information section includes a checkbox to autofill the billing details with the shipping details, if they are the same. After entering all the required information, users can proceed to pay and finalize their order.
+
+If the payment is successful, users will be directed to an order confirmation page, which provides details of their completed order.
+
+Feel free to explore the website and enjoy the seamless shopping experience it offers! Let me know if there's anything else you'd like to add or modify.
