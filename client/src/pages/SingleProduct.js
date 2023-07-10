@@ -132,8 +132,20 @@ const SingleProduct = () => {
   };
 
   if (productLoading) {
-    return <Spin size="large" />;
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
   }
+
 
   if (productError) {
     return (

@@ -452,7 +452,7 @@ const Home = () => {
         pageSize={pageSize}
         total={totalProducts}
         onChange={handlePaginationChange}
-        style={{ marginTop: "24px", textAlign: "center", fontSize: "18px" }}
+        style={{ marginTop: "24px", textAlign: "center", fontSize: "25px" }}
       />
       <Modal
         title="Login"

@@ -17,6 +17,7 @@ import Orders from "./pages/Orders";
 import ShoppingCart from "./pages/ShoppingCart";
 import Profile from "./pages/Profile";
 import SearchProducts from "./pages/SearchProducts";
+import Footer from "./components/Footer";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -41,9 +42,16 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <Router>
-        <div className="app">
+        <div
+          className="app"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+          }}
+        >
           <Navbar />
-          <div className="content">
+          <div className="content" style={{ flex: 1 }}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/product/:productId" element={<SingleProduct />} />
@@ -58,6 +66,7 @@ function App() {
               />
             </Routes>
           </div>
+          <Footer />
         </div>
       </Router>
     </ApolloProvider>
