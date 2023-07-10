@@ -95,7 +95,16 @@ const UserForm = () => {
               name="password"
               rules={[
                 { required: true, message: "Please enter your password" },
+                {
+                  min: 8,
+                  message: "Password must be at least 8 characters long",
+                },
+                {
+                  pattern: /[~`!@#$%^&*()-_+=,.?'":{}|<>]/,
+                  message: "Password must contain a special character",
+                },
               ]}
+              extra="Password must be at least 8 characters long and contain a special character"
             >
               <Input.Password placeholder="Password" />
             </Form.Item>
@@ -104,7 +113,7 @@ const UserForm = () => {
                 type="primary"
                 htmlType="submit"
                 loading={signupLoading}
-                style={{ width: "100%" }}
+                style={{ width: "100%",marginTop:"5px" }}
               >
                 Sign Up
               </Button>

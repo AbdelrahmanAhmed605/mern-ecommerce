@@ -100,7 +100,7 @@ const Home = () => {
   });
 
   // Lazy Query for fetching the currently logged in user
-  const [fetchCurrentUser, {refetch: refetchUser}] = useLazyQuery(GET_ME);
+  const [fetchCurrentUser, { refetch: refetchUser }] = useLazyQuery(GET_ME);
 
   // mutation to create a shopping cart
   const [createCart] = useMutation(CREATE_CART);
@@ -229,20 +229,24 @@ const Home = () => {
   // Sets the users selected sorting option
   const handleSortMenuClick = (item) => {
     setSortOption(item.key);
+    handlePaginationChange(1, pageSize);
   };
 
   // Resets the users selected filtering options
   const handleCategoryReset = () => {
     setSelectedCategories([]);
     setCategoryNames([]);
+    handlePaginationChange(1, pageSize);
   };
   const handlePriceReset = () => {
     setMinPrice(undefined);
     setMaxPrice(undefined);
+    handlePaginationChange(1, pageSize);
   };
   const handleRatingReset = () => {
     setMinRating(undefined);
     setMaxRating(undefined);
+    handlePaginationChange(1, pageSize);
   };
   const handleResetAll = () => {
     setSelectedCategories([]);
@@ -251,6 +255,7 @@ const Home = () => {
     setMaxPrice(undefined);
     setMinRating(undefined);
     setMaxRating(undefined);
+    handlePaginationChange(1, pageSize);
   };
 
   // Array containing the products that will be presented on the page after applying filters
@@ -313,6 +318,8 @@ const Home = () => {
           sortOption={sortOption}
           handleSortMenuClick={handleSortMenuClick}
           handleResetAll={handleResetAll}
+          handlePaginationChange={handlePaginationChange}
+          pageSize={pageSize}
         />
       </div>
 
