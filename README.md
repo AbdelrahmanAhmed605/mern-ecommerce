@@ -8,6 +8,7 @@ This project is a sample e-commerce website built using the MERN stack (MongoDB,
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Technologies Used](technologies-used)
 
 ## Project Overview
 
@@ -67,3 +68,32 @@ Both the shopping cart hover dropdown display and the shopping cart page contain
 If the payment is successful, users will be directed to an order confirmation page, which provides details of their completed order.
 
 Feel free to explore the website and enjoy the seamless shopping experience it offers! Let me know if there's anything else you'd like to add or modify.
+
+## Technologies Used
+
+The project utilizes a range of technologies to deliver its functionality and provide a seamless user experience.
+
+### Backend Technologies
+
+- **MongoDB with Mongoose**: The project utilizes Mongoose to define MongoDB model schemas and middlewares, allowing for efficient data management and interaction.
+- **mongoose-unique-validator**: This package is used for validation checks on the model schemas, ensuring data integrity and consistency.
+- **Express.js**: Express.js is employed as the server framework, enabling robust routing and handling of HTTP requests.
+- **Apollo Server with Express**: Apollo Server is integrated with Express.js to implement a GraphQL server. It facilitates the definition of types, queries, and mutations, as well as the resolution of those queries and mutations using GraphQL resolvers.
+- **bcrypt**: The bcrypt library is employed for encrypting user passwords, providing an additional layer of security.
+- **jsonwebtoken**: jsonwebtoken is used for user authentication. It enables the generation and verification of JSON web tokens, ensuring secure communication between the client and server.
+- **lodash**: Lodash is utilized to split resolvers into different files, enhancing code modularity. It allows for better organization and maintenance of the resolver logic.
+- **Stripe**: The Stripe API is integrated for payment processing. It offers a secure and reliable platform to handle transactions.
+
+### Frontend Technologies
+
+- **React**: The frontend is developed using React for building the user interface. It enables efficient component-based development and facilitates a dynamic and interactive user experience.
+- **React Router DOM**: React Router DOM is employed to enable seamless navigation and linking between different pages within the application.
+- **React Responsive**: The React Responsive library is utilized to determine the user's screen size, enabling the implementation of media queries and responsive layouts. This ensures an optimal user experience across different devices and screen sizes.
+- **Zustand**: Zustand is used for state management, allowing the application to maintain a single source for the state and enabling consistent data access and updates across multiple files.
+- **jwt-decode**: jwt-decode is employed to decode the token received from the server-side authentication. It enables extraction of information from the token for user-specific operations.
+- **@stripe/stripe-js** and **@stripe/react-stripe-js**: These Stripe libraries are used to render the necessary Stripe components and process payments securely using the Stripe API.
+- **Ant Design**: Ant Design is utilized for dynamic UI components, providing a consistent and aesthetically pleasing user interface throughout the application.
+- **@apollo/client**: The Apollo Client library is employed for frontend communication with the server-side resolvers. It enables easy integration with the GraphQL server, making mutations and queries from the frontend seamless and efficient.
+
+These technologies work together to create a robust and efficient e-commerce application, delivering an engaging user experience.
+
