@@ -130,6 +130,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
       });
       form.resetFields();
       message.success("Review submitted successfully");
+
       // Refetch the data to ensure the page includes the new review data without refreshing the page
       await refetchUserReview();
       await refetchProduct();
@@ -143,7 +144,7 @@ const ProductReviews = ({ productId, refetchProduct }) => {
         console.error("Error posting review:", error);
         message.error("Failed to submit review");
       }
-    } 
+    }
   };
 
   const handleUpdateReview = async (values) => {
@@ -231,7 +232,14 @@ const ProductReviews = ({ productId, refetchProduct }) => {
                 <div>
                   {editMode ? (
                     // Edit mode is enabled (the user is attempting to update their review)
-                    <Form layout="vertical" onFinish={handleUpdateReview}>
+                    <Form
+                      layout="vertical"
+                      initialValues={{
+                        rating: userReview?.rating || 0,
+                        comment: userReview?.comment || "",
+                      }}
+                      onFinish={handleUpdateReview}
+                    >
                       <Form.Item
                         name="rating"
                         label="Rating"

@@ -21,6 +21,8 @@ const FilterOptions = ({
   setMaxRating,
   handleSortMenuClick,
   handleResetAll,
+  handlePaginationChange,
+  pageSize,
 }) => {
   // Check if any filter options are selected
   const isFilterSelected =
@@ -55,7 +57,10 @@ const FilterOptions = ({
         <Menu.Item key={category._id}>
           <Checkbox
             checked={selectedCategories.includes(category._id)}
-            onChange={() => handleCategoryMenuClick(category)}
+            onChange={() => {
+              handleCategoryMenuClick(category);
+              handlePaginationChange(1, pageSize);
+            }}
           >
             {category.name}
           </Checkbox>
@@ -72,7 +77,10 @@ const FilterOptions = ({
           <InputNumber
             min={0}
             value={minPrice}
-            onChange={(value) => setMinPrice(value !== "" ? value : undefined)}
+            onChange={(value) => {
+              setMinPrice(value !== "" ? value : undefined);
+              handlePaginationChange(1, pageSize);
+            }}
             style={{ marginLeft: 8 }}
           />
         </div>
@@ -81,7 +89,10 @@ const FilterOptions = ({
           <InputNumber
             min={0}
             value={maxPrice}
-            onChange={(value) => setMaxPrice(value !== "" ? value : undefined)}
+            onChange={(value) => {
+              setMaxPrice(value !== "" ? value : undefined);
+              handlePaginationChange(1, pageSize);
+            }}
             style={{ marginLeft: 8 }}
           />
         </div>
@@ -100,7 +111,10 @@ const FilterOptions = ({
           <InputNumber
             min={0}
             value={minRating}
-            onChange={(value) => setMinRating(value !== "" ? value : undefined)}
+            onChange={(value) => {
+              setMinRating(value !== "" ? value : undefined);
+              handlePaginationChange(1, pageSize);
+            }}
             style={{ marginLeft: 8 }}
           />
         </div>
@@ -109,7 +123,10 @@ const FilterOptions = ({
           <InputNumber
             min={0}
             value={maxRating}
-            onChange={(value) => setMaxRating(value !== "" ? value : undefined)}
+            onChange={(value) => {
+              setMaxRating(value !== "" ? value : undefined);
+              handlePaginationChange(1, pageSize);
+            }}
             style={{ marginLeft: 8 }}
           />
         </div>
