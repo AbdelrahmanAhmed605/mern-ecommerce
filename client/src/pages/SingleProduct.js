@@ -60,7 +60,7 @@ const SingleProduct = () => {
   const product = productData?.product || {};
 
   // Lazy Query for fetching the currently logged in user
-  const [fetchCurrentUser] = useLazyQuery(GET_ME);
+  const [fetchCurrentUser, { refetch: refetchUser }] = useLazyQuery(GET_ME);
 
   // mutation to create a shopping cart
   const [createCart] = useMutation(CREATE_CART);
@@ -107,6 +107,7 @@ const SingleProduct = () => {
       // to true so when the user adds another product, we don't have to create a cart again
       if (!userData.me.cart && !cartCreated) {
         await createCart();
+        await refetchUser();
         setCartCreated(true); // Changes the cartCreated status to true as this store will be used in other files to refetch the cart once it has been created
       }
 
