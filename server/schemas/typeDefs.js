@@ -126,7 +126,7 @@ const typeDefs = gql`
     productsByUser(userId: ID!, page: Int, pageSize: Int): [Product!]!
 
     categories: [Category!]!
-    category(id: ID!): Category
+    category(categoryId: ID!): Category
 
     cart: Cart
 

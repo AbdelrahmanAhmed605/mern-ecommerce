@@ -18,22 +18,15 @@ const categoryResolvers = {
     },
 
     // Resolver for fetching a single category by ID
-    category: async (parent, { id }, context) => {
+    category: async (parent, { categoryId }) => {
       try {
-        if (!context.user) {
-          throw new AuthenticationError("You need to be logged in!");
-        }
-
-        const category = await Category.findById(id);
+        const category = await Category.findById(categoryId);
         if (!category) {
           throw new UserInputError("Category not found");
         }
         return category;
       } catch (error) {
-        if (
-          error instanceof AuthenticationError ||
-          error instanceof UserInputError
-        ) {
+        if (error instanceof UserInputError) {
           throw error;
         } else {
           throw new Error("Failed to fetch category");
@@ -43,7 +36,7 @@ const categoryResolvers = {
   },
   Mutation: {
     // ---------- FOR DEVELOPER AND ADMIN USE ----------
-      
+
     // Create a new category
     createCategory: async (parent, { name }, context) => {
       try {

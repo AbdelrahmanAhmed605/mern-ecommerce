@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { Link } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
 
 import {
   Row,
@@ -20,6 +21,7 @@ import {
   GET_FILTERED_PRODUCTS,
   GET_CATEGORIES,
   GET_ME,
+  GET_CATEGORY,
 } from "../utils/queries";
 import { CREATE_CART, ADD_PROD_TO_CART } from "../utils/mutations";
 import AuthService from "../utils/auth";
@@ -37,13 +39,30 @@ const { Title } = Typography;
 const Home = () => {
   // State variables for selected filter options
   const [selectedCategories, setSelectedCategories] = useState([]); // Stores selected category IDs
+  const [categoryNames, setCategoryNames] = useState(new Set()); // Stores selected category names
   const [minPrice, setMinPrice] = useState(undefined); // Stores minimum price value
   const [maxPrice, setMaxPrice] = useState(undefined); // Stores maximum price value
   const [minRating, setMinRating] = useState(undefined); // Stores minimum rating value
   const [maxRating, setMaxRating] = useState(undefined); // Stores maximum rating value
   const [sortOption, setSortOption] = useState(undefined); // Stores selected sort option
   const [page, setPage] = useState(1); // Current page number
-  const [pageSize, setPageSize] = useState(10); // Number of products per page
+  const [pageSize, setPageSize] = useState(12); // Number of products per page
+
+  // Use react-responsive to determine screen size
+  const isPhone = useMediaQuery({ maxWidth: 767 });
+  const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1023 });
+  const isLaptop = useMediaQuery({ minWidth: 1024, maxWidth: 1279 });
+  const isMonitor = useMediaQuery({ minWidth: 1280 });
+
+  // Set the backgroundSize for the cover image based on screen size
+  let backgroundSize;
+  if (isPhone || isTablet) {
+    backgroundSize = "cover";
+  } else if (isLaptop) {
+    backgroundSize = "80% auto";
+  } else if (isMonitor) {
+    backgroundSize = "30% auto";
+  }
 
   // store for checking the visibility of the sign up/login modal
   const userFormVisibility = useSignUpAndLoginStore(
@@ -65,6 +84,10 @@ const Home = () => {
     data: categoriesData,
   } = useQuery(GET_CATEGORIES);
   const categories = categoriesData?.categories || [];
+
+  // Query for fetching a specific category by its id
+  const [getCategory, { loading: categoryLoading, error: categoryError }] =
+    useLazyQuery(GET_CATEGORY);
 
   // Lazy Query for fetching all products based off a set of optional input parameters
   const [
@@ -121,6 +144,22 @@ const Home = () => {
   useEffect(() => {
     refetchProducts();
   }, [filteredProdData, refetchProducts]);
+
+  // Fetches the names of selected categories and updates the categoryNames state
+  useEffect(() => {
+    const fetchCategoryNames = async () => {
+      const newCategoryNames = new Set();
+
+      for (const categoryId of selectedCategories) {
+        const { data } = await getCategory({ variables: { categoryId } });
+        const categoryName = data?.category?.name || "Category Not Found";
+        newCategoryNames.add(categoryName);
+      }
+
+      setCategoryNames(newCategoryNames);
+    };
+    fetchCategoryNames();
+  }, [getCategory, selectedCategories]);
 
   // Adds a product to the user's shopping cart. Handles user authentication, cart creation, and product addition.
   // Displays appropriate messages for success and failure.
@@ -198,6 +237,7 @@ const Home = () => {
   // Resets the users selected filtering options
   const handleCategoryReset = () => {
     setSelectedCategories([]);
+    setCategoryNames([]);
   };
   const handlePriceReset = () => {
     setMinPrice(undefined);
@@ -209,6 +249,7 @@ const Home = () => {
   };
   const handleResetAll = () => {
     setSelectedCategories([]);
+    setCategoryNames([]);
     setMinPrice(undefined);
     setMaxPrice(undefined);
     setMinRating(undefined);
@@ -224,9 +265,9 @@ const Home = () => {
     <div>
       <div
         style={{
-          backgroundImage: `url('https://media.istockphoto.com/id/1395567847/photo/girl-in-an-oversized-hoodie-wearing-wireless-headphones-face-in-profile-neon-pink-and-blue.jpg?s=170667a&w=0&k=20&c=EFy1iYwswqz-Dhl8T7PxoLF2pIpJllhi7PM1f8M9zF8=')`,
-          backgroundSize: "cover",
-          backgroundPosition: "20% 30%",
+          backgroundImage: `url('https://images.unsplash.com/photo-1591785944213-c8b5b7a75ec6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80)`,
+          backgroundSize: backgroundSize,
+          backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           height: "300px",
           borderRadius: "8px",
@@ -234,8 +275,26 @@ const Home = () => {
         }}
       />
 
-      <Title level={1} style={{ textAlign: "center", marginBottom: "32px" }}>
-        New Arrivals
+      {/* Render the title using the fetched category name if available */}
+      <Title level={1} style={{ textAlign: "center", marginBottom: "30px" }}>
+        {selectedCategories.length > 0 ? (
+          categoryLoading ? (
+            "Loading..."
+          ) : categoryError ? (
+            "Error"
+          ) : (
+            <>
+              {Array.from(categoryNames).map((categoryName, index) => (
+                <React.Fragment key={categoryName}>
+                  <span>{categoryName}</span>
+                  {index < categoryNames.size - 1 && <span>, </span>}
+                </React.Fragment>
+              ))}
+            </>
+          )
+        ) : (
+          "All Products"
+        )}
       </Title>
 
       <div style={{ marginBottom: "16px", textAlign: "center" }}>
@@ -322,20 +381,17 @@ const Home = () => {
                           borderRadius: "8px",
                         }}
                       />
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        <h3 style={{ marginBottom: "4px", fontWeight: "bold" }}>
-                          {product.title}
-                        </h3>
-                        <p style={{ marginBottom: "4px", fontWeight: "bold" }}>
+                      <div style={{ margin: "20px 0px 10px 0px" }}>
+                        <Typography.Text strong style={{ fontSize: "24px" }}>
                           ${product.price}
-                        </p>
+                        </Typography.Text>
                       </div>
+                      <Title
+                        level={5}
+                        style={{ marginBottom: "4px", fontWeight: "bold" }}
+                      >
+                        {product.title}
+                      </Title>
                       <div style={{ marginBottom: "4px" }}>
                         <Rate
                           allowHalf
@@ -396,7 +452,7 @@ const Home = () => {
         pageSize={pageSize}
         total={totalProducts}
         onChange={handlePaginationChange}
-        style={{ marginTop: "24px", textAlign: "center" }}
+        style={{ marginTop: "24px", textAlign: "center", fontSize: "18px" }}
       />
       <Modal
         title="Login"

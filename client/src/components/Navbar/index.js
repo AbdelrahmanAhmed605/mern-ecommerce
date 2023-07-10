@@ -45,6 +45,7 @@ const { Search } = Input;
 const Navbar = () => {
   const navigate = useNavigate();
 
+  // Use react-responsive to determine screen size
   const isMediumScreen = useMediaQuery({ minWidth: 768 });
 
   // store for checking the users logged in status
