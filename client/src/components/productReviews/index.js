@@ -422,7 +422,11 @@ const ProductReviews = ({ productId, refetchProduct }) => {
               total={totalReviews}
               pageSize={reviewsPerPage}
               onChange={handlePageChange}
-              style={{ marginTop: "24px", textAlign: "center" }}
+              style={{
+                marginTop: "24px",
+                textAlign: "center",
+                fontSize: "18px",
+              }}
             />
           </>
         ) : (

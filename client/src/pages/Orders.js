@@ -179,7 +179,11 @@ const Orders = () => {
                 total={totalOrders}
                 pageSize={ordersPerPage}
                 onChange={handlePageChange}
-                style={{ marginTop: "24px", textAlign: "center" }}
+                style={{
+                  marginTop: "24px",
+                  textAlign: "center",
+                  fontSize: "18px",
+                }}
               />
             </>
           )}

@@ -6,7 +6,7 @@ const productSchema = new Schema(
     title: {
       type: String,
       required: [true, "Product name is required"],
-      maxlength: [150, "Title cannot exceed 150 characters"],
+      maxlength: [300, "Title cannot exceed 300 characters"],
     },
     description: {
       type: String,
