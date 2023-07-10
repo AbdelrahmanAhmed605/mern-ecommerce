@@ -8,7 +8,7 @@ This project is a sample e-commerce website built using the MERN stack (MongoDB,
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Technologies Used](technologies-used)
+- [Technologies Used](#technologies-used)
 
 ## Project Overview
 
