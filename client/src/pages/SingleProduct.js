@@ -26,10 +26,7 @@ import AuthService from "../utils/auth";
 
 import UserForm from "../components/UserForm";
 import ProductReviews from "../components/productReviews";
-import {
-  useSignUpAndLoginStore,
-  useLoginStatusStore,
-} from "../store/userStore";
+import { useSignUpAndLoginStore } from "../store/userStore";
 import { useCartCreatedStore } from "../store/cartStore";
 
 const SingleProduct = () => {
@@ -43,8 +40,8 @@ const SingleProduct = () => {
   const setUserFormVisibility = useSignUpAndLoginStore(
     (state) => state.setUserFormVisibility
   );
-  // store for checking the users logged in status
-  const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn);
+  // store for getting the cartCreated status which checks if a cart was just created
+  const cartCreated = useCartCreatedStore((state) => state.cartCreated);
   // store for setting the cartCreated status
   const setCartCreated = useCartCreatedStore((state) => state.setCartCreated);
 
@@ -106,10 +103,9 @@ const SingleProduct = () => {
       const { data } = await fetchCurrentUser(); // Fetch the current user after successful login
       const userData = data;
 
-      // If user doesn't have a cart and they are not logged in, create one
-      // since we are not refetching the cart data in this file, we use the
-      // loggedIn store to determine if a cart was already created
-      if (!userData.me.cart && !isLoggedIn) {
+      // If user doesn't have a cart or a a new one was not created, then creat one and set the cartCreated status
+      // to true so when the user adds another product, we don't have to create a cart again
+      if (!userData.me.cart && !cartCreated) {
         await createCart();
         setCartCreated(true); // Changes the cartCreated status to true as this store will be used in other files to refetch the cart once it has been created
       }
@@ -145,7 +141,6 @@ const SingleProduct = () => {
       </div>
     );
   }
-
 
   if (productError) {
     return (
