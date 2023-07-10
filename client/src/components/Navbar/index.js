@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { Link, useNavigate } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
 
 import {
   Menu,
@@ -44,8 +45,8 @@ const { Search } = Input;
 const Navbar = () => {
   const navigate = useNavigate();
 
-  // State for checking the user's screen size
-  const [windowSize, setWindowSize] = useState(window.innerWidth);
+  const isMediumScreen = useMediaQuery({ minWidth: 768 });
+
   // store for checking the users logged in status
   const isLoggedIn = useLoginStatusStore((state) => state.isLoggedIn);
   // store for checking the visibility of the sign up/login modal
@@ -97,21 +98,6 @@ const Navbar = () => {
   useEffect(() => {
     cartRefetch();
   }, [cartData, cartRefetch]);
-
-  useEffect(() => {
-    // Function to handle window resize event
-    const handleResize = () => {
-      setWindowSize(window.innerWidth);
-    };
-
-    // Add event listener for window resize
-    window.addEventListener("resize", handleResize);
-
-    // Clean up the event listener on component unmount
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   // Function to allow user to log out of their account
   const handleLogout = () => {
@@ -196,7 +182,7 @@ const Navbar = () => {
             Shop All
           </Link>
         </Col>
-        <Col xs={16} sm={16} md={16} lg={8}>
+        <Col xs={16} sm={16} md={8} lg={8}>
           <Search
             placeholder="Search for products"
             enterButton
@@ -204,12 +190,12 @@ const Navbar = () => {
             onSearch={handleSearch}
           />
         </Col>
-        <Col xs={24} sm={24} md={16} lg={8} style={{ textAlign: "right" }}>
+        <Col xs={24} sm={24} md={8} lg={8} style={{ textAlign: "right" }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: windowSize >= 992 ? "flex-end" : "flex-start",
+              justifyContent: "flex-end",
             }}
           >
             {/* User icon and User dropdown menu */}
@@ -240,7 +226,7 @@ const Navbar = () => {
             <Dropdown
               overlay={
                 // Only allow the dropdown for larger screens as it covers a large portion of the screen for smaller devices which could distract users
-                windowSize >= 768 ? (
+                isMediumScreen ? (
                   <>
                     {AuthService.loggedIn() ? (
                       // If the user is logged in, display the user's cart total amount, and cart products and their quantities
