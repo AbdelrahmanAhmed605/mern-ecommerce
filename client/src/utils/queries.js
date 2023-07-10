@@ -156,7 +156,7 @@ export const GET_CATEGORIES = gql`
 // Query to get a single category by ID
 export const GET_CATEGORY = gql`
   query Category($categoryId: ID!) {
-    category(id: $categoryId) {
+    category(categoryId: $categoryId) {
       _id
       name
     }

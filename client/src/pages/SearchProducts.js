@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, Link } from "react-router-dom";
 
@@ -35,7 +35,7 @@ const SearchProducts = () => {
 
   // State variables
   const [page, setPage] = useState(1); // Current page number
-  const [pageSize, setPageSize] = useState(10); // Number of products per page
+  const [pageSize, setPageSize] = useState(12); // Number of products per page
 
   // Retrieve user form visibility state and setter function from the custom store
   const userFormVisibility = useSignUpAndLoginStore(
@@ -226,27 +226,17 @@ const SearchProducts = () => {
                           borderRadius: "8px",
                         }}
                       />
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: "8px",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Title
-                          level={5}
-                          style={{ marginBottom: "0", fontWeight: "bold" }}
-                        >
-                          {product.title}
-                        </Title>
-                        <Text
-                          strong
-                          style={{ marginBottom: "0", fontWeight: "bold" }}
-                        >
+                      <div style={{ margin: "20px 0px 10px 0px" }}>
+                        <Text strong style={{ fontSize: "24px" }}>
                           ${product.price}
                         </Text>
                       </div>
+                      <Title
+                        level={5}
+                        style={{ marginBottom: "4px", fontWeight: "bold" }}
+                      >
+                        {product.title}
+                      </Title>
                       <div style={{ marginBottom: "4px" }}>
                         <Rate
                           allowHalf
@@ -305,7 +295,7 @@ const SearchProducts = () => {
             pageSize={pageSize}
             total={totalProducts}
             onChange={handlePaginationChange}
-            style={{ marginTop: "24px", textAlign: "center" }}
+            style={{ marginTop: "24px", textAlign: "center", fontSize: "18px" }}
           />
         </>
       ) : (

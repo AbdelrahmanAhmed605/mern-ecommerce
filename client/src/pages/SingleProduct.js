@@ -154,12 +154,18 @@ const SingleProduct = () => {
             message={`Product almost out of stock! Only ${product.stockQuantity} left in stock`}
             type="warning"
             showIcon
+            style={{ fontSize: "18px" }}
           />
         </div>
       )}
       {product.stockQuantity <= 0 && (
         <div style={{ marginBottom: "16px" }}>
-          <Alert message={`Product out of stock!`} type="warning" showIcon />
+          <Alert
+            message={`Product out of stock!`}
+            type="warning"
+            showIcon
+            style={{ fontSize: "18px" }}
+          />
         </div>
       )}
       <Row gutter={[16, 16]} justify="center">
