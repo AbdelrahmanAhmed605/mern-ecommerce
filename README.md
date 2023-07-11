@@ -2,6 +2,8 @@
 
 This project is a sample e-commerce website built using the MERN stack (MongoDB, Express.js, React, and Node.js). The application aims to provide users with a seamless shopping experience, offering a wide range of products and essential functionalities.
 
+Website: [Mern E-commerce Website](https://abeds-mern-ecommerce-e78e4f542dbd.herokuapp.com/)
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
@@ -11,6 +13,8 @@ This project is a sample e-commerce website built using the MERN stack (MongoDB,
 - [Technologies Used](#technologies-used)
 - [API Reference](#api-reference)
 - [Database Schema](#database-schema)
+- [Deployment](#deployment)
+- [Feedback and Bug Reports](#feedback-and-bug-reports)
 
 ## Project Overview
 
@@ -144,4 +148,47 @@ Feel free to explore the available operations in the client-side code and utiliz
 
 ![Database Schema](README_assets/Database_Schema.png)
 
+## Deployment
 
+The project is deployed and accessible on Heroku. You can visit the deployed site by clicking on the following link: [Mern E-commerce Website](https://abeds-mern-ecommerce-e78e4f542dbd.herokuapp.com/)
+
+### Prerequisites
+
+To access the deployed site and interact with the features, you will need:
+
+- A compatible web browser (e.g., Chrome, Firefox, Safari)
+- Internet connectivity
+
+### Accessing the Deployed Site
+
+To access the deployed site on Heroku, follow these steps:
+
+1. Open a web browser.
+2. Enter the following URL in the address bar: `https://your-project-name.herokuapp.com`.
+3. Press Enter or Return to load the site.
+
+### Interacting with the Site
+
+Once you have accessed the deployed site, you can interact with its features and functionality. Here are some key actions you can perform:
+
+- Explore the various pages and sections of the site.
+- Register for an account or log in if you already have one.
+- Browse and search for products.
+- Add products to your cart and proceed to checkout.
+- View your order history and manage your profile.
+
+### Troubleshooting
+
+If you encounter any issues while accessing or using the deployed site, please consider the following:
+
+- Ensure that you have a stable internet connection.
+- Clear your browser's cache and cookies, then reload the site.
+- Try accessing the site from a different browser or device.
+
+If the issue persists or you require further assistance, please open a new issue on the project's GitHub repository.
+
+## Feedback and Bug Reports
+
+If you have any feedback, suggestions, or bug reports related to the deployed site, I encourage you to share them with me. You can provide feedback by opening an issue on the project's GitHub repository
+
+I appreciate your contribution to improving the site and ensuring a seamless user experience.
