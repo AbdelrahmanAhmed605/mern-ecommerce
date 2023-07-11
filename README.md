@@ -8,6 +8,7 @@ Website: [Mern E-commerce Website](https://abeds-mern-ecommerce-e78e4f542dbd.her
 
 - [Project Overview](#project-overview)
 - [Features](#features)
+- [Limitations](#limitations)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
@@ -53,6 +54,17 @@ The sample e-commerce website offers the following key features:
 - **Reviews**: Users can post reviews for products and read reviews submitted by other users.
 - **User Authentication**: Secure user authentication is implemented, allowing access to specific features only when logged in.
 - **Responsive UI**: The application provides a responsive user interface that adapts to different screen sizes and provides feedback on loading processes and error messages.
+
+## Limitations
+
+It's important to consider the following limitations related to the project:
+
+1. Trade-off between pollInterval duration and application performance: The project utilizes a pollInterval for queries, which allows for periodic data updates. However, there is a trade-off between the pollInterval duration and application performance. Selecting a shorter duration may increase the frequency of queries, potentially slowing down the application. On the other hand, choosing a longer duration might result in users experiencing delays in receiving timely updates. It's essential to find an optimal balance based on the specific needs of the project.
+
+2. Order creation and payment failure: When an order is created using a mutation, if the subsequent payment fails, the order status is changed to "canceled" using an update mutation. However, if the update mutation fails for any reason, the order will still be created, and the stock quantity of the product will be reduced. This scenario could result in a discrepancy between the order status and the actual stock availability. Robust error handling mechanisms and safeguards should be implemented to ensure accurate order status updates and prevent incorrect stock quantity reduction in such scenarios.
+
+These limitations highlight areas where careful consideration and potential improvements can enhance the functionality, performance, and reliability of the project. Contributions and enhancements to address these limitations are encouraged to optimize the user experience and overall system integrity.
+
 
 ## Installation
 
