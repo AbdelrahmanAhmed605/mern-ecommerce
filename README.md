@@ -50,7 +50,9 @@ The sample e-commerce website offers the following key features:
 - **Product Filters**: Users can apply filters to narrow down their search results and find products based on specific criteria.
 - **Shopping Cart**: Users can add products to their shopping cart, manage quantities, and view a summary of selected items.
 - **Stock Management**: The application ensures that users cannot add more quantities of a product than what is available in stock.
-- **Real-time Updates**: Changes made in one section of the application seamlessly reflect in other related areas. For example, modifying the quantity of a product in the shopping cart will update the quantity in the checkout as well.
+- **Automated Stock Quantity Updates**: When an order is made, the products that are purchased will be automatically reduced from the stock quantity. In the event of an order cancellation, the stock quantity will be replenished with the corresponding amount of each product from the canceled order.
+- **Synchronized Updates**: Changes made in one section of the application are automatically reflected in other related areas. For example, modifying the quantity of a product in the shopping cart will instantly update the quantity in the checkout, ensuring a synchronized and consistent user experience.
+- **Real-time Updates**: Users receive real-time updates on product availability. If a product is purchased by another user and the stock is running low, the quantity will be dynamically updated on the user's page.
 - **Order History and Status**: Users can view their order history and check the status of their orders.
 - **Reviews**: Users can post reviews for products and read reviews submitted by other users.
 - **User Authentication**: Secure user authentication is implemented, allowing access to specific features only when logged in.
@@ -85,6 +87,8 @@ Feel free to contribute to the project by implementing these features or suggest
 As this project is a deployed website, there is no installation required. Simply access the website by visiting the provided URL.
 
 ## Usage
+
+Website: [Mern E-commerce Website](https://abeds-mern-ecommerce-e78e4f542dbd.herokuapp.com/)
 
 Upon entering the project, users will land on the main homepage, where they can immediately browse all the available products. The homepage showcases product listings with essential information, including the product image, price, review rating (with the number of reviews), a warning message if the product is low on stock, and an "Add To Cart" button.
 
