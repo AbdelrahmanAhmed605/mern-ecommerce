@@ -15,6 +15,9 @@ Website: [Mern E-commerce Website](https://abeds-mern-ecommerce-e78e4f542dbd.her
 - [Database Schema](#database-schema)
 - [Deployment](#deployment)
 - [Feedback and Bug Reports](#feedback-and-bug-reports)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
 ## Project Overview
 
@@ -192,3 +195,19 @@ If the issue persists or you require further assistance, please open a new issue
 If you have any feedback, suggestions, or bug reports related to the deployed site, I encourage you to share them with me. You can provide feedback by opening an issue on the project's GitHub repository
 
 I appreciate your contribution to improving the site and ensuring a seamless user experience.
+
+## Contributing
+
+Contributions are welcome! If you encounter any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request. When contributing to this project, please follow the [Contributor Covenant](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) code of conduct.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). See the `LICENSE` file for more details.
+
+## Contact
+
+For any inquiries or questions, you can reach out to me:
+
+- Name: [Abdelrahman Ahmed]
+- Email: [abdelrahman.ahmed605@hotmail.com]
+- GitHub: [AbdelrahmanAhmed605]([https://github.com/your-username](https://github.com/AbdelrahmanAhmed605)https://github.com/AbdelrahmanAhmed605)
