@@ -9,6 +9,7 @@ This project is a sample e-commerce website built using the MERN stack (MongoDB,
 - [Installation](#installation)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
+- [API Reference](#api-reference)
 
 ## Project Overview
 
@@ -96,4 +97,43 @@ The project utilizes a range of technologies to deliver its functionality and pr
 - **@apollo/client**: The Apollo Client library is employed for frontend communication with the server-side resolvers. It enables easy integration with the GraphQL server, making mutations and queries from the frontend seamless and efficient.
 
 These technologies work together to create a robust and efficient e-commerce application, delivering an engaging user experience.
+
+## API Reference
+
+The API in this project provides seamless integration between the server-side and client-side through a combination of GraphQL and RESTful endpoints. It enables efficient communication and data manipulation between the frontend and backend.
+
+### Server-side Operations
+
+On the server-side, the GraphQL API provides a set of type definitions that define the structure of the data entities and their relationships. These type definitions include types such as User, Product, Cart, Order, Review, and Category, each with its respective fields.
+
+The API supports various queries and mutations to interact with these data entities. Some key server-side operations include:
+
+- **User Operations**: The API allows retrieving user information, such as the currently logged-in user (me), all users (allUsers), and a single user by their ID (singleUser).
+- **Product Operations**: Users can perform operations related to products, including retrieving all products (products), a single product by its ID (product), filtered products based on specific criteria (filteredProducts), and searching for products (searchProducts).
+- **Cart Operations**: Users can manage their shopping cart with operations like retrieving the cart (cart), adding products to the cart (addToCart), removing products from the cart (removeFromCart), updating the quantity of products in the cart (updateCartProductQuantity), and resetting the cart (resetCart).
+- **Order Operations**: Users can place orders with operations like creating a new order (createOrder), updating the status of an order (updateOrder), and retrieving orders by the user (ordersByUser).
+- **Review Operations**: Users can interact with reviews by creating new reviews (createReview), updating existing reviews (updateReview), and deleting reviews (deleteReview).
+
+Additionally, the API includes a RESTful endpoint for handling Stripe payment:
+- **Stripe Payment**: A RESTful API endpoint /create-payment-intent is provided to handle the creation of a payment intent. It accepts the amount and currency as input, sanitizes the amount, and creates a payment intent using the Stripe API. The client secret of the payment intent is returned as the response.
+
+### Client-side Operations
+On the client-side, the GraphQL API is accessed through the Apollo Client library. The client-side operations include a set of queries and mutations that correspond to the server-side definitions. These operations are used to fetch data from the server and perform mutations.
+
+Here are some examples of client-side operations:
+
+- **CREATE_USER**: Creates a new user by providing their role, username, email, and password.
+- **GET_ME**: Retrieves the currently logged-in user, including their ID, email, and username.
+- **GET_PRODUCTS**: Retrieves all products, including their ID, title, price, image, stock quantity, average rating, and associated reviews.
+- **GET_SINGLE_PRODUCT**: Fetches details of a single product by its ID, including its ID, title, description, image, price, stock quantity, average rating, associated categories, reviews, and user information.
+- **GET_FILTERED_PRODUCTS**: Retrieves a list of filtered products based on various criteria, including category IDs, price range, rating range, sort option, and pagination.
+- **GET_CART**: Retrieves the user's shopping cart, including the cart ID, products in the cart, and the total price. Each product in the cart includes its ID, title, price, image, stock quantity, and the quantity of the product in the cart.
+- **ADD_PROD_TO_CART**: Adds a product to the user's cart by providing the product ID and quantity.
+- **UPDATE_CART_PROD_QUANTITY**: Updates the quantity of a product in the cart. It requires the product ID and the new quantity as input.
+- **CREATE_ORDER**: Places a new order by providing the product details, total amount, address, status, name, and email.
+- **CREATE_REVIEW**: Creates a new review for a product. It requires the product ID, rating, and comment as input. After creating the review, it returns the review ID, associated product ID, associated user ID, comment, and rating.
+
+These are just a few examples of the client-side operations available. Each operation corresponds to a specific server-side query or mutation and allows users to interact with the GraphQL API from the frontend.
+
+Feel free to explore the available operations in the client-side code and utilize them to fetch data from the server and perform mutations as needed.
 
