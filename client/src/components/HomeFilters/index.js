@@ -3,27 +3,38 @@ import { Menu, Checkbox, InputNumber, Button, Dropdown, Row, Col } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import "./index.css";
 
+import {
+  useProductCategoriesStore,
+  useProductSortingStore,
+  useProductPriceStore,
+  useProductRatingStore,
+} from "../../store/productStore";
+
 const FilterOptions = ({
   categories,
-  selectedCategories,
-  handleCategoryMenuClick,
-  handleCategoryReset,
-  minPrice,
-  maxPrice,
-  handlePriceReset,
-  setMinPrice,
-  setMaxPrice,
-  minRating,
-  maxRating,
-  sortOption,
-  handleRatingReset,
-  setMinRating,
-  setMaxRating,
-  handleSortMenuClick,
-  handleResetAll,
   handlePaginationChange,
   pageSize,
+  setCategoryNames,
 }) => {
+  // State variables for the visibility of filter options
+  const [categoryMenuVisible, setCategoryMenuVisible] = useState(false); // Controls category dropdown element visibility
+  const [priceMenuVisible, setPriceMenuVisible] = useState(false); // Controls price dropdown element visibility
+  const [ratingMenuVisible, setRatingMenuVisible] = useState(false); // Controls rating dropdown element visibility
+
+  // ---------- Store state variables for selected filter options ----------
+
+  // Get selected categories state and actions from the store
+  const { selectedCategories, setSelectedCategories, clearSelectedCategories } =
+    useProductCategoriesStore();
+  // Get the selected sort option state and action to set the state from the store
+  const { sortOption, setSortOption } = useProductSortingStore();
+  // Get the selected price filters state and actions to set the states from the store
+  const { minPrice, maxPrice, setMinPrice, setMaxPrice } =
+    useProductPriceStore();
+  // Get the selected rating filters state and actions to set the states from the store
+  const { minRating, maxRating, setMinRating, setMaxRating } =
+    useProductRatingStore();
+
   // Check if any filter options are selected
   const isFilterSelected =
     selectedCategories.length > 0 ||
@@ -31,10 +42,6 @@ const FilterOptions = ({
     maxPrice !== undefined ||
     minRating !== undefined ||
     maxRating !== undefined;
-
-  const [categoryMenuVisible, setCategoryMenuVisible] = useState(false); // Controls category dropdown element visibility
-  const [priceMenuVisible, setPriceMenuVisible] = useState(false); // Controls price dropdown element visibility
-  const [ratingMenuVisible, setRatingMenuVisible] = useState(false); // Controls rating dropdown element visibility
 
   // Toggles the visibility of the dropdown menus since these event handlers are triggered by the onVisibleChange event
   const handleCategoryMenuVisibleChange = (visible) => {
@@ -45,6 +52,46 @@ const FilterOptions = ({
   };
   const handleRatingMenuVisibleChange = (visible) => {
     setRatingMenuVisible(visible);
+  };
+
+  // ---------- Event handlers for filter options ----------
+
+  // Toggles the users selection of categories in the dropdown
+  const handleCategoryMenuClick = (item) => {
+    const itemId = item._id;
+    setSelectedCategories(itemId);
+  };
+
+  // Sets the users selected sorting option
+  const handleSortMenuClick = (item) => {
+    setSortOption(item.key);
+    handlePaginationChange(1, pageSize);
+  };
+
+  // Resets the users selected filtering options
+  const handleCategoryReset = () => {
+    clearSelectedCategories();
+    setCategoryNames([]);
+    handlePaginationChange(1, pageSize);
+  };
+  const handlePriceReset = () => {
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    handlePaginationChange(1, pageSize);
+  };
+  const handleRatingReset = () => {
+    setMinRating(undefined);
+    setMaxRating(undefined);
+    handlePaginationChange(1, pageSize);
+  };
+  const handleResetAll = () => {
+    clearSelectedCategories();
+    setCategoryNames([]);
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setMinRating(undefined);
+    setMaxRating(undefined);
+    handlePaginationChange(1, pageSize);
   };
 
   // ---------- Dropdown menus for filter options ----------

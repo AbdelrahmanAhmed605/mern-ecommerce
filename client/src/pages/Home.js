@@ -30,18 +30,22 @@ import UserForm from "../components/UserForm";
 import FilterOptions from "../components/HomeFilters";
 import { useSignUpAndLoginStore } from "../store/userStore";
 import { useCartCreatedStore } from "../store/cartStore";
+import {
+  useProductCategoriesStore,
+  useProductSortingStore,
+  useProductPriceStore,
+  useProductRatingStore,
+} from "../store/productStore";
 
 const { Title } = Typography;
 
 const Home = () => {
   // State variables for selected filter options
-  const [selectedCategories, setSelectedCategories] = useState([]); // Stores selected category IDs
+  const { selectedCategories } = useProductCategoriesStore(); // Stores selected category ID's
   const [categoryNames, setCategoryNames] = useState(new Set()); // Stores selected category names
-  const [minPrice, setMinPrice] = useState(undefined); // Stores minimum price value
-  const [maxPrice, setMaxPrice] = useState(undefined); // Stores maximum price value
-  const [minRating, setMinRating] = useState(undefined); // Stores minimum rating value
-  const [maxRating, setMaxRating] = useState(undefined); // Stores maximum rating value
-  const [sortOption, setSortOption] = useState(undefined); // Stores selected sort option
+  const { sortOption } = useProductSortingStore(); // Stores selected product sorting option
+  const { minPrice, maxPrice } = useProductPriceStore(); // Stores selected product price filters
+  const { minRating, maxRating } = useProductRatingStore(); // Stores selected product rating filters
   const [page, setPage] = useState(1); // Current page number
   const [pageSize, setPageSize] = useState(12); // Number of products per page
 
@@ -212,52 +216,6 @@ const Home = () => {
     setPageSize(newPageSize);
   };
 
-  // ---------- Event handlers for filter options ----------
-
-  // Toggles the users selection of categories in the dropdown
-  const handleCategoryMenuClick = (item) => {
-    const itemId = item._id;
-    setSelectedCategories((prevSelectedCategories) => {
-      if (prevSelectedCategories.includes(itemId)) {
-        return prevSelectedCategories.filter((id) => id !== itemId); // Remove selected category
-      } else {
-        return [...prevSelectedCategories, itemId]; // Add selected category
-      }
-    });
-  };
-
-  // Sets the users selected sorting option
-  const handleSortMenuClick = (item) => {
-    setSortOption(item.key);
-    handlePaginationChange(1, pageSize);
-  };
-
-  // Resets the users selected filtering options
-  const handleCategoryReset = () => {
-    setSelectedCategories([]);
-    setCategoryNames([]);
-    handlePaginationChange(1, pageSize);
-  };
-  const handlePriceReset = () => {
-    setMinPrice(undefined);
-    setMaxPrice(undefined);
-    handlePaginationChange(1, pageSize);
-  };
-  const handleRatingReset = () => {
-    setMinRating(undefined);
-    setMaxRating(undefined);
-    handlePaginationChange(1, pageSize);
-  };
-  const handleResetAll = () => {
-    setSelectedCategories([]);
-    setCategoryNames([]);
-    setMinPrice(undefined);
-    setMaxPrice(undefined);
-    setMinRating(undefined);
-    setMaxRating(undefined);
-    handlePaginationChange(1, pageSize);
-  };
-
   // Array containing the products that will be presented on the page after applying filters
   const displayedProducts = filteredProdData?.filteredProducts?.products || [];
   const totalProducts = filteredProdData?.filteredProducts?.totalProducts || 0;
@@ -302,22 +260,7 @@ const Home = () => {
       <div style={{ marginBottom: "16px", textAlign: "center" }}>
         <FilterOptions
           categories={categories}
-          selectedCategories={selectedCategories}
-          handleCategoryMenuClick={handleCategoryMenuClick}
-          handleCategoryReset={handleCategoryReset}
-          minPrice={minPrice}
-          maxPrice={maxPrice}
-          handlePriceReset={handlePriceReset}
-          setMinPrice={setMinPrice}
-          setMaxPrice={setMaxPrice}
-          minRating={minRating}
-          maxRating={maxRating}
-          handleRatingReset={handleRatingReset}
-          setMinRating={setMinRating}
-          setMaxRating={setMaxRating}
-          sortOption={sortOption}
-          handleSortMenuClick={handleSortMenuClick}
-          handleResetAll={handleResetAll}
+          setCategoryNames={setCategoryNames}
           handlePaginationChange={handlePaginationChange}
           pageSize={pageSize}
         />
