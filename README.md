@@ -10,6 +10,7 @@ This project is a sample e-commerce website built using the MERN stack (MongoDB,
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
 - [API Reference](#api-reference)
+- [Database Schema](#database-schema)
 
 ## Project Overview
 
@@ -28,6 +29,8 @@ Payment processing is handled through the Stripe implementation, although please
 The responsive user interface of the application offers a seamless experience across different devices and screen sizes. It provides feedback on loading processes, alerts users about errors when necessary, and adapts to deliver optimal performance.
 
 Please feel free to explore the website and take advantage of these features for an enhanced shopping experience!
+
+![Front Page Screenshot](README_assets/mern-ecommerce.png)
 
 ## Features
 
@@ -136,4 +139,9 @@ Here are some examples of client-side operations:
 These are just a few examples of the client-side operations available. Each operation corresponds to a specific server-side query or mutation and allows users to interact with the GraphQL API from the frontend.
 
 Feel free to explore the available operations in the client-side code and utilize them to fetch data from the server and perform mutations as needed.
+
+## Database Schema
+
+![Database Schema](README_assets/Database_Schema.png)
+
 
