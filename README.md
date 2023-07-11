@@ -9,6 +9,7 @@ Website: [Mern E-commerce Website](https://abeds-mern-ecommerce-e78e4f542dbd.her
 - [Project Overview](#project-overview)
 - [Features](#features)
 - [Limitations](#limitations)
+- [Future Implementations](#future-implementations)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
@@ -65,6 +66,19 @@ It's important to consider the following limitations related to the project:
 
 These limitations highlight areas where careful consideration and potential improvements can enhance the functionality, performance, and reliability of the project. Contributions and enhancements to address these limitations are encouraged to optimize the user experience and overall system integrity.
 
+## Future Implementations
+
+The project has potential for future enhancements and feature additions to further improve its functionality and user experience. Here are some features that could be implemented in the future:
+
+1. **Product Availability Filtering**: Provide options for users to filter and view only products that are currently in stock. This feature can enhance the browsing experience by allowing users to focus on available products and avoid disappointment from viewing out-of-stock items.
+
+2. **Nested Categories**: Implement nested categories to organize and structure the category hierarchy. Currently, all categories are listed together, but by introducing nested categories, you can create parent categories with subcategories, providing a more intuitive and organized navigation experience for users.
+
+3. **Variants for Products**: Enhance the product listing by including support for products with variations such as different colors, sizes, or features. This feature allows users to view and select different versions of the same product based on their preferences, providing a more comprehensive and flexible shopping experience.
+
+Implementing these features would contribute to the overall functionality, usability, and user satisfaction of the project. As the project evolves, incorporating these enhancements can make it more versatile and cater to a wider range of user needs.
+
+Feel free to contribute to the project by implementing these features or suggesting other ideas that can further enrich the functionality of the application.
 
 ## Installation
 
